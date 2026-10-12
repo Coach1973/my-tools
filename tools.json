@@ -45,6 +45,18 @@
     "url": "https://kueilan.com/",
     "desc": "用 AI 幫你提早下班",
     "tag": "AI老師"
+   },
+   {
+    "name": "Freebeat｜AI 音樂影片",
+    "url": "https://freebeat.ai/tw",
+    "desc": "AI 音樂與影片創作（繁中版）",
+    "tag": "AI老師"
+   },
+   {
+    "name": "JFETEK｜聯絡洽詢",
+    "url": "https://www.jfetek.com/contact",
+    "desc": "1–2 工作天回覆方案與時程，預設保密",
+    "tag": "AI老師"
    }
   ]
  },
@@ -199,6 +211,12 @@
     "url": "https://event.bymyway.com/seabiscuit20/#home",
     "desc": "Sea Biscuit Club 2007–2027",
     "tag": "策展"
+   },
+   {
+    "name": "教練與軍師：深夜的 32MB 封包攻防戰 第1話",
+    "url": "https://www.tava-ai.com/chat/b72pvmh9x1/index.html",
+    "desc": "TAVA 做的漫畫",
+    "tag": "漫畫"
    },
    {
     "name": "大樹的答案 ── 漫畫版",

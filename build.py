@@ -9,6 +9,8 @@ S=[
 ("SubEasy｜AI 轉寫字幕翻譯","https://www.subeasy.ai/zh-TW/users/myplan","音訊轉文字、影片字幕、翻譯（我的方案頁）","AI老師"),
 ("秒站 Site Now｜AI 架站","https://site-now.app/","零代碼填空建形象、購物車、課程網站","AI老師"),
 ("奎嵐 KueiLan｜AI 教學與社群代操","https://kueilan.com/","用 AI 幫你提早下班","AI老師"),
+("Freebeat｜AI 音樂影片","https://freebeat.ai/tw","AI 音樂與影片創作（繁中版）","AI老師"),
+("JFETEK｜聯絡洽詢","https://www.jfetek.com/contact","1–2 工作天回覆方案與時程，預設保密","AI老師"),
 ]),
 ("know","📚","學會・媒體・知識",[
 ("台灣人工智慧暨區塊鏈應用學會","https://www.ais.org.tw/index.html","AI 學會官網","學會"),
@@ -38,6 +40,7 @@ S=[
 ("像瘋子的發明家｜黃國彰","https://event.bymyway.com/curated/inventor/","能源專利發明人","策展"),
 ("南應大校友互動記憶牆","https://event.bymyway.com/curated/tut-memory/","TUT Alumni Memory Wall","策展"),
 ("海餅乾俱樂部 20 週年","https://event.bymyway.com/seabiscuit20/#home","Sea Biscuit Club 2007–2027","策展"),
+("教練與軍師：深夜的 32MB 封包攻防戰 第1話","https://www.tava-ai.com/chat/b72pvmh9x1/index.html","TAVA 做的漫畫","漫畫"),
 ("大樹的答案 ── 漫畫版","https://event.bymyway.com/curated/answer/","日系漫畫版思想漫畫","漫畫"),
 ("大樹教練｜企業成長條漫 EP01–EP05","https://event.bymyway.com/curated/answer2/","全五話條漫","漫畫"),
 ]),
