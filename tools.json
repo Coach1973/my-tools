@@ -1,0 +1,217 @@
+[
+ {
+  "id": "ai",
+  "icon": "🤖",
+  "title": "AI 老師推薦的工具",
+  "items": [
+   {
+    "name": "CMO｜AI 行銷工作台",
+    "url": "https://cmo.oyag.com/",
+    "desc": "受眾分析、行銷時機、網站規劃、AI 焦點團體",
+    "tag": "AI老師"
+   },
+   {
+    "name": "TAVA AI｜Skills as a Service",
+    "url": "https://www.tava-ai.com/chat",
+    "desc": "影片、網站、設計、研究的技能平台",
+    "tag": "AI老師"
+   },
+   {
+    "name": "Muse｜個人 AI 代理",
+    "url": "https://muse.ai/",
+    "desc": "給它一個目標，幫你把事做完",
+    "tag": "AI老師"
+   },
+   {
+    "name": "Duck.ai｜私密 AI 聊天",
+    "url": "https://duck.ai/",
+    "desc": "DuckDuckGo 出的免費匿名 AI 對話",
+    "tag": "AI老師"
+   },
+   {
+    "name": "SubEasy｜AI 轉寫字幕翻譯",
+    "url": "https://www.subeasy.ai/zh-TW/users/myplan",
+    "desc": "音訊轉文字、影片字幕、翻譯（我的方案頁）",
+    "tag": "AI老師"
+   },
+   {
+    "name": "秒站 Site Now｜AI 架站",
+    "url": "https://site-now.app/",
+    "desc": "零代碼填空建形象、購物車、課程網站",
+    "tag": "AI老師"
+   },
+   {
+    "name": "奎嵐 KueiLan｜AI 教學與社群代操",
+    "url": "https://kueilan.com/",
+    "desc": "用 AI 幫你提早下班",
+    "tag": "AI老師"
+   }
+  ]
+ },
+ {
+  "id": "know",
+  "icon": "📚",
+  "title": "學會・媒體・知識",
+  "items": [
+   {
+    "name": "台灣人工智慧暨區塊鏈應用學會",
+    "url": "https://www.ais.org.tw/index.html",
+    "desc": "AI 學會官網",
+    "tag": "學會"
+   },
+   {
+    "name": "餐飲人筆記",
+    "url": "https://foodnote.tw/",
+    "desc": "餐飲老闆文章、知識分享",
+    "tag": "知識"
+   },
+   {
+    "name": "SoundOn Podcast 播放器",
+    "url": "https://player.soundon.fm/p/01bac58b-741f-4cbc-8fa6-58dd45f24923",
+    "desc": "Podcast 節目頁",
+    "tag": "Podcast"
+   }
+  ]
+ },
+ {
+  "id": "home",
+  "icon": "🏠",
+  "title": "大樹官方入口",
+  "items": [
+   {
+    "name": "大樹教育顧問（官方網站）",
+    "url": "https://www.bymyway.com/",
+    "desc": "大樹教練官方網站",
+    "tag": "官方"
+   },
+   {
+    "name": "BNI 大台南南區・分會列表",
+    "url": "https://chapters.bymyway.com/",
+    "desc": "各分會入口",
+    "tag": "BNI"
+   },
+   {
+    "name": "大樹小講；無話不談",
+    "url": "https://event.bymyway.com/bigtree/",
+    "desc": "2013 年起的公益巡講場次",
+    "tag": "官方"
+   },
+   {
+    "name": "AI 改變世界．百人導師同行",
+    "url": "https://mentor100.bymyway.com/",
+    "desc": "mentor100 導師計畫",
+    "tag": "官方"
+   },
+   {
+    "name": "AI 特助心法・一鍵注入",
+    "url": "https://coach1973.github.io/ai-go/",
+    "desc": "貼給任何 AI，30 秒進入特助狀態",
+    "tag": "常用"
+   }
+  ]
+ },
+ {
+  "id": "daily",
+  "icon": "🗓️",
+  "title": "我的日常查詢",
+  "items": [
+   {
+    "name": "2026 全年度行事曆",
+    "url": "https://tainan-calender.netlify.app/",
+    "desc": "全年度行事曆",
+    "tag": "查詢"
+   },
+   {
+    "name": "大樹教練｜可約時間",
+    "url": "https://event.bymyway.com/schedule/t1qZLUh7D4RoewGA/",
+    "desc": "別人預約我的時間表",
+    "tag": "查詢"
+   },
+   {
+    "name": "大樹教練待辦事項",
+    "url": "https://event.bymyway.com/todo",
+    "desc": "特助主動提醒版",
+    "tag": "查詢"
+   },
+   {
+    "name": "2026 企業 AI 導入與政府補助需求調查",
+    "url": "https://docs.google.com/forms/d/e/1FAIpQLSdCIH8ffceaxzxoTEZhd4ZaJlPVLMw9unkoHtUm_HOyD6v43g/viewform",
+    "desc": "Google 表單",
+    "tag": "表單"
+   },
+   {
+    "name": "字級大小對照表",
+    "url": "https://coach1973.github.io/coach888/font-scale.html",
+    "desc": "大樹AI工具箱的字級參考",
+    "tag": "工具"
+   }
+  ]
+ },
+ {
+  "id": "works",
+  "icon": "🎨",
+  "title": "大樹作品・策展頁",
+  "items": [
+   {
+    "name": "大臺南商圈整合計劃・大台南策展中心",
+    "url": "https://event.bymyway.com/tainan-shangquan/",
+    "desc": "免費為店家建站、開通頻道",
+    "tag": "策展"
+   },
+   {
+    "name": "全世界最優秀的團隊計畫",
+    "url": "https://event.bymyway.com/curated/three-lacks/",
+    "desc": "客戶、人才、伯樂",
+    "tag": "策展"
+   },
+   {
+    "name": "為你轉身｜真 AI 線上團隊商業導師席",
+    "url": "https://event.bymyway.com/curated/turnforyou/",
+    "desc": "八位商業顧問師",
+    "tag": "策展"
+   },
+   {
+    "name": "約瑟布｜生命農業與永續商業計畫",
+    "url": "https://event.bymyway.com/curated/joseph-cloth/",
+    "desc": "榮樹下客戶網站",
+    "tag": "策展"
+   },
+   {
+    "name": "有薇力，新東區｜蔡筱薇競選總部成立大會",
+    "url": "https://event.bymyway.com/curated/111-wei/",
+    "desc": "11/1（日）09:00",
+    "tag": "策展"
+   },
+   {
+    "name": "像瘋子的發明家｜黃國彰",
+    "url": "https://event.bymyway.com/curated/inventor/",
+    "desc": "能源專利發明人",
+    "tag": "策展"
+   },
+   {
+    "name": "南應大校友互動記憶牆",
+    "url": "https://event.bymyway.com/curated/tut-memory/",
+    "desc": "TUT Alumni Memory Wall",
+    "tag": "策展"
+   },
+   {
+    "name": "海餅乾俱樂部 20 週年",
+    "url": "https://event.bymyway.com/seabiscuit20/#home",
+    "desc": "Sea Biscuit Club 2007–2027",
+    "tag": "策展"
+   },
+   {
+    "name": "大樹的答案 ── 漫畫版",
+    "url": "https://event.bymyway.com/curated/answer/",
+    "desc": "日系漫畫版思想漫畫",
+    "tag": "漫畫"
+   },
+   {
+    "name": "大樹教練｜企業成長條漫 EP01–EP05",
+    "url": "https://event.bymyway.com/curated/answer2/",
+    "desc": "全五話條漫",
+    "tag": "漫畫"
+   }
+  ]
+ }
+]
