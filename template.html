@@ -37,6 +37,13 @@ a.item:hover{border-color:var(--gold);background:#1a1a1a}
 .handle{display:none;font-size:28px;color:var(--gold);cursor:grab;touch-action:none;padding:0 6px;user-select:none}
 .editing .handle{display:block}
 .more{display:none}.editing .more{display:block}
+.bulk-checkbox{display:none;flex-shrink:0;font-size:30px;line-height:1;color:var(--gold);user-select:none}
+.bulking .bulk-checkbox{display:block}.bulking a.item{cursor:pointer}
+.item.selected{border-color:var(--gold);background:rgba(200,169,110,.12)}
+.sec-sel{display:none;padding:4px 12px}.bulking .sec-sel{display:inline-block}
+.bulk-bar{position:fixed;left:0;right:0;bottom:0;background:#151107;border-top:2px solid var(--gold);padding:14px 20px;display:none;align-items:center;gap:12px;flex-wrap:wrap;z-index:40;box-shadow:0 -4px 16px rgba(0,0,0,.4)}
+.bulking .bulk-bar{display:flex}.bulk-bar .cnt{color:var(--gold);font-weight:900}
+.bulk-bar select{background:#1c1c1c;color:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 12px;max-width:100%}
 .drop-before{box-shadow:0 -4px 0 0 var(--gold)}.grid.drop-end{box-shadow:0 4px 0 0 var(--gold)}
 .dragging{opacity:.4}
 .addrow{display:none;margin-top:8px}.editing .addrow{display:block}
@@ -54,16 +61,20 @@ a.item:hover{border-color:var(--gold);background:#1a1a1a}
 <p class="sub" id="sub"></p>
 <div class="bar"><input class="search" id="q" type="search" placeholder="🔍 搜尋：名稱／網址／說明">
 <button class="btn" id="editBtn">✏️ 編輯排版</button>
+<button class="btn" id="bulkBtn">☑️ 批量搬移模式</button>
 <button class="btn hide" id="addSec">＋新增分類</button>
 <span class="status" id="status"></span></div></div>
 <div class="wrap" id="wrap"></div>
-<div class="foot">按「✏️ 編輯排版」可以自己改分類名稱、拖曳或用「⋯」搬項目、新增與刪除網址；改完自動儲存，每台裝置看到的都一樣。</div>
+<div class="bulk-bar" id="bulkBar"><span>已勾選 <span class="cnt" id="bulkCnt">0</span> 個項目</span>
+<select id="bulkTo"></select><button class="btn" id="bulkMove">搬移到這個分類</button>
+<button class="btn danger" id="bulkDel">🗑 刪除勾選項目</button></div>
+<div class="foot">按「✏️ 編輯排版」可以自己改分類名稱、拖曳或用「⋯」搬項目、新增與刪除網址；按「☑️ 批量搬移模式」可以勾選多個網址，一次搬到指定分類或刪除；改完自動儲存，每台裝置看到的都一樣。</div>
 <script>
 const DEFAULTS=__DEFAULTS__;
 const DIRTY='mytools_dirty_v1';
 const API='https://event.bymyway.com/api/mytools/state';
 const CACHE='mytools_state_v1';
-let state=null,edit=false,saveTimer=null;
+let state=null,edit=false,bulk=false,saveTimer=null;const sel=new Set();
 const $=s=>document.querySelector(s);
 function h(tag,attrs,...kids){const e=document.createElement(tag);for(const k in(attrs||{})){if(k==='class')e.className=attrs[k];else if(k.startsWith('on'))e[k]=attrs[k];else e.setAttribute(k,attrs[k])}
  kids.flat().forEach(c=>e.append(c instanceof Node?c:document.createTextNode(c)));return e}
@@ -76,7 +87,7 @@ function merge(st){ // 之後在原始清單新增的網址，伺服器版沒有
 function countAll(){return state.sections.reduce((n,s)=>n+s.items.length,0)}
 function render(){
  $('#sub').textContent='共 '+countAll()+' 個網址，分 '+state.sections.length+' 類。點名稱開新分頁；點分類標題可收合；上方可搜尋。';
- document.body.classList.toggle('editing',edit);$('#editBtn').textContent=edit?'✅ 完成編輯':'✏️ 編輯排版';$('#editBtn').classList.toggle('on',edit);$('#addSec').classList.toggle('hide',!edit);
+ document.body.classList.toggle('editing',edit);document.body.classList.toggle('bulking',bulk);$('#bulkBtn').textContent=bulk?'✅ 結束批量搬移':'☑️ 批量搬移模式';$('#bulkBtn').classList.toggle('on',bulk);fillBulk();$('#editBtn').textContent=edit?'✅ 完成編輯':'✏️ 編輯排版';$('#editBtn').classList.toggle('on',edit);$('#addSec').classList.toggle('hide',!edit);
  const wrap=$('#wrap');wrap.textContent='';
  state.sections.forEach((s,si)=>{
   const grid=h('div',{class:'grid'});grid.dataset.si=si;
@@ -87,18 +98,20 @@ function render(){
    h('button',{class:'btn',onclick:e=>{e.stopPropagation();secForm(si)}},'✎ 改名稱'),
    h('button',{class:'btn danger',onclick:e=>{e.stopPropagation();delSec(si)}},'🗑 刪除分類'));
   const title=h('div',{class:'sec-title',onclick:()=>{s.collapsed=!s.collapsed;sec.classList.toggle('collapsed',s.collapsed);persist()}},
-   h('span',{class:'arrow'},'▼'),(s.icon?s.icon+' ':'')+s.title,h('span',{class:'count'},s.items.length+'項'),tools);
+   h('span',{class:'arrow'},'▼'),(s.icon?s.icon+' ':'')+s.title,h('span',{class:'count'},s.items.length+'項'),h('button',{class:'btn sec-sel',onclick:e=>{e.stopPropagation();selSec(si)}},'全選這一類'),tools);
   const sec=h('section',{class:'sec'+(s.collapsed?' collapsed':'')},title,grid,
    h('div',{class:'addrow'},h('button',{class:'btn',onclick:()=>itemForm(si,-1)},'＋新增網址到這一類')));
   wrap.append(sec)});
  applySearch()}
 function itemEl(it,si,ii){
- const inner=[h('div',{class:'handle',title:'拖曳搬動'},'⠿'),h('div',{class:'num'},String(ii+1)),
+ const box=h('span',{class:'bulk-checkbox'},sel.has(it)?'☑':'☐');
+ const inner=[h('div',{class:'handle',title:'拖曳搬動'},'⠿'),box,h('div',{class:'num'},String(ii+1)),
   h('div',{class:'mid'},h('div',{class:'name'},it.name),h('div',{class:'url'},host(it.url)),it.desc?h('div',{class:'desc'},it.desc):''),
   it.tag?h('div',{class:'badge'},it.tag):'',h('button',{class:'btn more',onclick:e=>{e.preventDefault();e.stopPropagation();itemForm(si,ii)}},'⋯')];
  const a=h('a',{class:'item',href:it.url,target:'_blank',rel:'noopener'},inner);
  a.dataset.s=(it.name+' '+it.url+' '+it.desc+' '+it.tag).toLowerCase();a.dataset.si=si;a.dataset.ii=ii;
- a.addEventListener('click',e=>{if(edit)e.preventDefault()});
+ if(sel.has(it))a.classList.add('selected');
+ a.addEventListener('click',e=>{if(edit||bulk)e.preventDefault();if(bulk&&!e.target.closest('.handle,.more')){sel.has(it)?sel.delete(it):sel.add(it);a.classList.toggle('selected',sel.has(it));box.textContent=sel.has(it)?'☑':'☐';$('#bulkCnt').textContent=sel.size}});
  const hd=a.querySelector('.handle');hd.addEventListener('pointerdown',e=>dragStart(e,a,si,ii));
  return a}
 function applySearch(){const k=$('#q').value.trim().toLowerCase();
@@ -120,6 +133,17 @@ function moveItem(fs,fi,ts,ti){const it=state.sections[fs].items.splice(fi,1)[0]
 function moveSec(si,d){const j=si+d;if(j<0||j>=state.sections.length)return;const a=state.sections;[a[si],a[j]]=[a[j],a[si]];render();persist()}
 function delSec(si){const s=state.sections[si];if(s.items.length){alert('這一類還有 '+s.items.length+' 個網址，請先把它們搬到別的分類，再刪除分類。');return}
  if(state.sections.length<=1){alert('至少要留一個分類。');return}if(confirm('確定刪除分類「'+s.title+'」？')){state.sections.splice(si,1);render();persist()}}
+// ---- 批量搬移（跟「大樹作品一覽」同一套操作：勾選 → 選分類 → 搬移）----
+function fillBulk(){const o=$('#bulkTo'),v=o.value;o.textContent='';state.sections.forEach((s,i)=>o.append(h('option',{value:String(i)},(s.icon?s.icon+' ':'')+s.title)));if(v&&+v<state.sections.length)o.value=v;$('#bulkCnt').textContent=sel.size}
+function selSec(si){const its=state.sections[si].items,all=its.length&&its.every(i=>sel.has(i));its.forEach(i=>all?sel.delete(i):sel.add(i));render()}
+function bulkMove(){if(!sel.size){setStatus('請先勾選要搬移的項目',true);return}
+ const ti=+$('#bulkTo').value,t=state.sections[ti],moved=[];
+ state.sections.forEach((s,si)=>{if(si!==ti)s.items=s.items.filter(i=>{if(sel.has(i)){moved.push(i);return false}return true})});
+ t.items.push(...moved);sel.clear();render();
+ if(!moved.length){setStatus('勾選的網址本來就在「'+t.title+'」');return}persist()}
+function bulkDel(){if(!sel.size){setStatus('請先勾選要刪除的項目',true);return}
+ if(!confirm('確定刪除勾選的 '+sel.size+' 個網址？'))return;
+ state.sections.forEach(s=>{s.items=s.items.filter(i=>{if(sel.has(i)){(state.removed=state.removed||[]).push(i.url);return false}return true})});sel.clear();render();persist()}
 // ---- 表單 ----
 function modal(title,fields,buttons){const mask=h('div',{class:'mask'});const box=h('div',{class:'modal'},h('h3',{},title));const inputs={};
  fields.forEach(f=>{box.append(h('label',{},f.label));let el;if(f.options){el=h('select',{},f.options.map(o=>{const op=h('option',{value:o.v},o.t);if(o.v===f.value)op.selected=true;return op}))}else{el=h('input',{value:f.value||'',placeholder:f.ph||''})}inputs[f.key]=el;box.append(el)});
@@ -147,10 +171,10 @@ function persist(){try{localStorage.setItem(CACHE,JSON.stringify(state));localSt
  setStatus('儲存中…');clearTimeout(saveTimer);saveTimer=setTimeout(push,500)}
 function push(){fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:state}),keepalive:true})
  .then(r=>r.ok?(setStatus('✓ 已儲存，所有裝置都會看到'),localStorage.removeItem(DIRTY)):Promise.reject(r.status)).catch(()=>setStatus('⚠ 儲存失敗，稍後再試（已先存在這台裝置）',true))}
-$('#editBtn').onclick=()=>{edit=!edit;render()};$('#addSec').onclick=()=>secForm(-1);$('#q').addEventListener('input',applySearch);
+$('#editBtn').onclick=()=>{edit=!edit;render()};$('#bulkBtn').onclick=()=>{bulk=!bulk;if(!bulk)sel.clear();render()};$('#bulkMove').onclick=bulkMove;$('#bulkDel').onclick=bulkDel;$('#addSec').onclick=()=>secForm(-1);$('#q').addEventListener('input',applySearch);
 addEventListener('pagehide',()=>{if(saveTimer){clearTimeout(saveTimer);push()}});
 let cached=null;try{cached=JSON.parse(localStorage.getItem(CACHE)||'null')}catch(e){}
 state=merge(cached&&cached.sections?cached:defaults());render();
 fetch(API).then(r=>r.json()).then(j=>{if(localStorage.getItem(DIRTY)){push();return} // 這台有還沒送出去的修改，先送出，不被伺服器舊版蓋掉
- if(j&&j.data&&j.data.sections){state=merge(j.data);try{localStorage.setItem(CACHE,JSON.stringify(state))}catch(e){}render()}}).catch(()=>{});
+ if(j&&j.data&&j.data.sections){sel.clear();state=merge(j.data);try{localStorage.setItem(CACHE,JSON.stringify(state))}catch(e){}render()}}).catch(()=>{});
 </script></body></html>
