@@ -10,7 +10,7 @@ S=[
 ("秒站 Site Now｜AI 架站","https://site-now.app/","零代碼填空建形象、購物車、課程網站","AI老師"),
 ("奎嵐 KueiLan｜AI 教學與社群代操","https://kueilan.com/","用 AI 幫你提早下班","AI老師"),
 ("Freebeat｜AI 音樂影片","https://freebeat.ai/tw","AI 音樂與影片創作（繁中版）","AI老師"),
-("個人行銷／品牌網頁｜開工指令與製作經驗","https://coach1973.github.io/tava-brand-web-playbook/","TAVA 的品牌網頁做法（我的 GitHub 備份，一模一樣）","經驗手冊"),
+("個人行銷／品牌網頁｜開工指令與製作經驗","https://coach1973.github.io/tava-brand-web-playbook/","TAVA 品牌網頁做法 v2（我的 GitHub 備份，一模一樣；2026-10-15 更新，新增公益足跡）","經驗手冊"),
 ("JFETEK｜聯絡洽詢","https://www.jfetek.com/contact","1–2 工作天回覆方案與時程，預設保密","AI老師"),
 ]),
 ("know","📚","學會・媒體・知識",[
