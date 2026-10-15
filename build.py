@@ -50,56 +50,7 @@ S=[
 ]
 n=sum(len(s[3]) for s in S)
 json.dump([{"id":a,"icon":b,"title":c,"items":[dict(name=x[0],url=x[1],desc=x[2],tag=x[3]) for x in d]} for a,b,c,d in S],open('tools.json','w',encoding='utf8'),ensure_ascii=False,indent=1)
-def host(u):
-    p=urlparse(u);return p.netloc+(p.path.rstrip('/') if p.path!='/' else '')
-secs=''
-for a,ic,t,items in S:
-    rows=''.join(f'<a class="item" href="{html.escape(u)}" target="_blank" rel="noopener" data-s="{html.escape((nm+" "+u+" "+d+" "+tg).lower())}"><div class="num">{i}</div><div class="mid"><div class="name">{html.escape(nm)}</div><div class="url">{html.escape(host(u))}</div><div class="desc">{html.escape(d)}</div></div><div class="badge">{html.escape(tg)}</div></a>' for i,(nm,u,d,tg) in enumerate(items,1))
-    secs+=f'<section class="sec" id="{a}"><div class="sec-title"><span class="arrow">▼</span>{ic} {t} <span class="count">{len(items)}項</span></div><div class="grid">{rows}</div></section>\n'
-page=f'''<!DOCTYPE html>
-<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>大樹的常用查詢網站（個人專用）</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
-<style>
-:root{{--gold:#c8a96e;--dark:#0a0a0a;--dark2:#141414;--line:rgba(200,169,110,.3)}}
-*{{margin:0;padding:0;box-sizing:border-box}}
-body{{font-family:'Noto Sans TC',sans-serif;background:var(--dark);color:#fff;padding:36px 20px 100px}}
-.wrap{{max-width:1500px;margin:0 auto;column-count:2;column-gap:48px}}
-.head{{max-width:1500px;margin:0 auto}}
-h1{{font-size:30px;font-weight:900;margin-bottom:6px}}h1 span{{color:var(--gold)}}
-.sub{{color:rgba(255,255,255,.5);font-size:16px;margin-bottom:18px}}
-.search{{width:100%;max-width:520px;background:var(--dark2);border:1px solid var(--line);color:#fff;border-radius:10px;padding:12px 16px;font:inherit;font-size:16px;margin-bottom:28px}}
-.search:focus{{outline:none;border-color:var(--gold)}}
-.sec{{break-inside:avoid;display:inline-block;width:100%}}
-.sec-title{{display:flex;align-items:center;gap:10px;margin:40px 0 16px;font-size:20px;font-weight:900;color:var(--gold);cursor:pointer;user-select:none}}
-.sec-title::after{{content:'';flex:1;height:1px;background:var(--line)}}
-.sec-title .count{{font-size:14px;color:rgba(255,255,255,.4);font-weight:700;order:2}}
-.sec-title::after{{order:3}}
-.arrow{{font-size:13px;color:rgba(255,255,255,.4);transition:transform .2s}}
-.sec.collapsed .arrow{{transform:rotate(-90deg)}}.sec.collapsed .grid{{display:none}}
-.grid{{display:flex;flex-direction:column;gap:8px}}
-.item{{display:flex;align-items:center;gap:12px;color:#fff;text-decoration:none;background:var(--dark2);border:1px solid var(--line);border-radius:10px;padding:10px 14px 10px 10px;transition:.2s}}
-.item:hover{{border-color:var(--gold);background:#1a1a1a}}
-.num{{flex-shrink:0;width:34px;height:34px;border-radius:8px;background:#1c1c1c;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;color:var(--gold);border:1px solid var(--line)}}
-.mid{{flex:1;min-width:0}}.name{{font-weight:700;font-size:17px}}
-.url{{font-size:13px;color:rgba(255,255,255,.35);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
-.desc{{font-size:13px;color:rgba(255,255,255,.55);margin-top:2px}}
-.badge{{font-size:12px;font-weight:900;padding:3px 9px;border-radius:999px;flex-shrink:0;background:rgba(200,169,110,.15);color:var(--gold)}}
-.hide{{display:none!important}}
-.foot{{max-width:1500px;margin:40px auto 0;color:rgba(255,255,255,.3);font-size:13px}}
-@media(max-width:900px){{.wrap{{column-count:1}}}}
-</style></head><body>
-<div class="head"><h1>大樹的常用查詢網站<span>｜個人專用</span></h1>
-<p class="sub">共 {n} 個網址，分 {len(S)} 類。點名稱直接開新分頁；點分類標題可收合；上方可搜尋名稱、網址、說明。</p>
-<input class="search" id="q" type="search" placeholder="🔍 搜尋：名稱／網址／說明（例如 AI、行事曆、約瑟）"></div>
-<div class="wrap" id="wrap">
-{secs}</div>
-<div class="foot">這份清單由 AI 維護，新網址丟給 AI 就會補進來。</div>
-<script>
-document.querySelectorAll('.sec-title').forEach(t=>t.onclick=()=>t.parentElement.classList.toggle('collapsed'));
-document.getElementById('q').addEventListener('input',e=>{{const k=e.target.value.trim().toLowerCase();
-document.querySelectorAll('.item').forEach(i=>i.classList.toggle('hide',!!k&&!i.dataset.s.includes(k)));
-document.querySelectorAll('.sec').forEach(s=>{{const v=s.querySelectorAll('.item:not(.hide)').length;s.classList.toggle('hide',!!k&&!v);if(k&&v)s.classList.remove('collapsed')}})}});
-</script></body></html>'''
-open('index.html','w',encoding='utf8').write(page)
+defaults=[{"id":a,"icon":b,"title":c,"items":[dict(name=x[0],url=x[1],desc=x[2],tag=x[3]) for x in d]} for a,b,c,d in S]
+tpl=open('template.html',encoding='utf8').read()
+open('index.html','w',encoding='utf8').write(tpl.replace('__DEFAULTS__',json.dumps(defaults,ensure_ascii=False)))
 print(n)

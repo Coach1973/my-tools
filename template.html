@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>大樹的常用查詢網站（個人專用）</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#c8a96e;--dark:#0a0a0a;--dark2:#141414;--line:rgba(200,169,110,.3)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans TC',sans-serif;font-size:20px;background:var(--dark);color:#fff;padding:36px 20px 120px}
+button,input,select{font:inherit;font-size:20px}
+.wrap{max-width:1500px;margin:0 auto;column-count:2;column-gap:48px}
+.head{max-width:1500px;margin:0 auto}
+h1{font-size:32px;font-weight:900;margin-bottom:6px}h1 span{color:var(--gold)}
+.sub{color:rgba(255,255,255,.6);font-size:20px;margin-bottom:18px}
+.bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:28px}
+.search{flex:1 1 360px;max-width:560px;background:var(--dark2);border:1px solid var(--line);color:#fff;border-radius:10px;padding:12px 16px}
+.search:focus{outline:none;border-color:var(--gold)}
+.btn{background:var(--dark2);color:var(--gold);border:1px solid var(--line);border-radius:10px;padding:10px 18px;cursor:pointer;font-weight:700}
+.btn:hover{border-color:var(--gold)}.btn.on{background:var(--gold);color:#000}
+.btn.danger{color:#ff7a7a;border-color:rgba(255,122,122,.4)}
+.status{color:rgba(255,255,255,.6)}.status.err{color:#ff7a7a}
+.sec{break-inside:avoid;display:inline-block;width:100%}
+.sec-title{display:flex;align-items:center;gap:10px;margin:40px 0 16px;font-size:24px;font-weight:900;color:var(--gold);cursor:pointer;user-select:none;flex-wrap:wrap}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--line);order:3;min-width:30px}
+.sec-title .count{font-size:20px;color:rgba(255,255,255,.5);font-weight:700;order:2}
+.arrow{font-size:20px;color:rgba(255,255,255,.5);transition:transform .2s}
+.sec.collapsed .arrow{transform:rotate(-90deg)}.sec.collapsed .grid,.sec.collapsed .addrow{display:none}
+.sec-tools{display:none;gap:8px;order:4;width:100%}
+.editing .sec-tools{display:flex;flex-wrap:wrap}
+.grid{display:flex;flex-direction:column;gap:8px;min-height:20px}
+.item{display:flex;align-items:center;gap:12px;color:#fff;text-decoration:none;background:var(--dark2);border:1px solid var(--line);border-radius:10px;padding:10px 14px 10px 10px;transition:.2s}
+a.item:hover{border-color:var(--gold);background:#1a1a1a}
+.num{flex-shrink:0;width:42px;height:42px;border-radius:8px;background:#1c1c1c;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;color:var(--gold);border:1px solid var(--line)}
+.mid{flex:1;min-width:0}.name{font-weight:700;font-size:22px}
+.url{font-size:20px;color:rgba(255,255,255,.45);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.desc{font-size:20px;color:rgba(255,255,255,.65);margin-top:2px}
+.badge{font-size:20px;font-weight:900;padding:3px 12px;border-radius:999px;flex-shrink:0;background:rgba(200,169,110,.15);color:var(--gold)}
+.handle{display:none;font-size:28px;color:var(--gold);cursor:grab;touch-action:none;padding:0 6px;user-select:none}
+.editing .handle{display:block}
+.more{display:none}.editing .more{display:block}
+.drop-before{box-shadow:0 -4px 0 0 var(--gold)}.grid.drop-end{box-shadow:0 4px 0 0 var(--gold)}
+.dragging{opacity:.4}
+.addrow{display:none;margin-top:8px}.editing .addrow{display:block}
+.hide{display:none!important}
+.foot{max-width:1500px;margin:40px auto 0;color:rgba(255,255,255,.5);font-size:20px}
+.mask{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal{background:#181818;border:1px solid var(--gold);border-radius:14px;padding:22px;width:100%;max-width:560px;max-height:92vh;overflow:auto}
+.modal h3{font-size:24px;color:var(--gold);margin-bottom:14px}
+.modal label{display:block;margin:12px 0 4px;color:rgba(255,255,255,.7)}
+.modal input,.modal select{width:100%;background:var(--dark);border:1px solid var(--line);color:#fff;border-radius:8px;padding:10px 12px}
+.modal .acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+@media(max-width:900px){.wrap{column-count:1}}
+</style></head><body>
+<div class="head"><h1>大樹的常用查詢網站<span>｜個人專用</span></h1>
+<p class="sub" id="sub"></p>
+<div class="bar"><input class="search" id="q" type="search" placeholder="🔍 搜尋：名稱／網址／說明">
+<button class="btn" id="editBtn">✏️ 編輯排版</button>
+<button class="btn hide" id="addSec">＋新增分類</button>
+<span class="status" id="status"></span></div></div>
+<div class="wrap" id="wrap"></div>
+<div class="foot">按「✏️ 編輯排版」可以自己改分類名稱、拖曳或用「⋯」搬項目、新增與刪除網址；改完自動儲存，每台裝置看到的都一樣。</div>
+<script>
+const DEFAULTS=__DEFAULTS__;
+const DIRTY='mytools_dirty_v1';
+const API='https://event.bymyway.com/api/mytools/state';
+const CACHE='mytools_state_v1';
+let state=null,edit=false,saveTimer=null;
+const $=s=>document.querySelector(s);
+function h(tag,attrs,...kids){const e=document.createElement(tag);for(const k in(attrs||{})){if(k==='class')e.className=attrs[k];else if(k.startsWith('on'))e[k]=attrs[k];else e.setAttribute(k,attrs[k])}
+ kids.flat().forEach(c=>e.append(c instanceof Node?c:document.createTextNode(c)));return e}
+function host(u){try{const p=new URL(u);return p.host+(p.pathname==='/'?'':p.pathname.replace(/\/$/,''))}catch(e){return u}}
+function clone(o){return JSON.parse(JSON.stringify(o))}
+function defaults(){return{sections:DEFAULTS.map(s=>({id:s.id,icon:s.icon,title:s.title,collapsed:false,items:clone(s.items)})),removed:[]}}
+function merge(st){ // 之後在原始清單新增的網址，伺服器版沒有、也沒被刪過 → 自動補進對應分類
+ const known=new Set(st.removed||[]);st.sections.forEach(s=>s.items.forEach(i=>known.add(i.url)));
+ DEFAULTS.forEach(d=>d.items.forEach(i=>{if(!known.has(i.url)){const t=st.sections.find(s=>s.id===d.id)||st.sections[0];t.items.push(clone(i))}}));return st}
+function countAll(){return state.sections.reduce((n,s)=>n+s.items.length,0)}
+function render(){
+ $('#sub').textContent='共 '+countAll()+' 個網址，分 '+state.sections.length+' 類。點名稱開新分頁；點分類標題可收合；上方可搜尋。';
+ document.body.classList.toggle('editing',edit);$('#editBtn').textContent=edit?'✅ 完成編輯':'✏️ 編輯排版';$('#editBtn').classList.toggle('on',edit);$('#addSec').classList.toggle('hide',!edit);
+ const wrap=$('#wrap');wrap.textContent='';
+ state.sections.forEach((s,si)=>{
+  const grid=h('div',{class:'grid'});grid.dataset.si=si;
+  s.items.forEach((it,ii)=>grid.append(itemEl(it,si,ii)));
+  const tools=h('div',{class:'sec-tools'},
+   h('button',{class:'btn',onclick:e=>{e.stopPropagation();moveSec(si,-1)}},'▲ 上移'),
+   h('button',{class:'btn',onclick:e=>{e.stopPropagation();moveSec(si,1)}},'▼ 下移'),
+   h('button',{class:'btn',onclick:e=>{e.stopPropagation();secForm(si)}},'✎ 改名稱'),
+   h('button',{class:'btn danger',onclick:e=>{e.stopPropagation();delSec(si)}},'🗑 刪除分類'));
+  const title=h('div',{class:'sec-title',onclick:()=>{s.collapsed=!s.collapsed;sec.classList.toggle('collapsed',s.collapsed);persist()}},
+   h('span',{class:'arrow'},'▼'),(s.icon?s.icon+' ':'')+s.title,h('span',{class:'count'},s.items.length+'項'),tools);
+  const sec=h('section',{class:'sec'+(s.collapsed?' collapsed':'')},title,grid,
+   h('div',{class:'addrow'},h('button',{class:'btn',onclick:()=>itemForm(si,-1)},'＋新增網址到這一類')));
+  wrap.append(sec)});
+ applySearch()}
+function itemEl(it,si,ii){
+ const inner=[h('div',{class:'handle',title:'拖曳搬動'},'⠿'),h('div',{class:'num'},String(ii+1)),
+  h('div',{class:'mid'},h('div',{class:'name'},it.name),h('div',{class:'url'},host(it.url)),it.desc?h('div',{class:'desc'},it.desc):''),
+  it.tag?h('div',{class:'badge'},it.tag):'',h('button',{class:'btn more',onclick:e=>{e.preventDefault();e.stopPropagation();itemForm(si,ii)}},'⋯')];
+ const a=h('a',{class:'item',href:it.url,target:'_blank',rel:'noopener'},inner);
+ a.dataset.s=(it.name+' '+it.url+' '+it.desc+' '+it.tag).toLowerCase();a.dataset.si=si;a.dataset.ii=ii;
+ a.addEventListener('click',e=>{if(edit)e.preventDefault()});
+ const hd=a.querySelector('.handle');hd.addEventListener('pointerdown',e=>dragStart(e,a,si,ii));
+ return a}
+function applySearch(){const k=$('#q').value.trim().toLowerCase();
+ document.querySelectorAll('.item').forEach(i=>i.classList.toggle('hide',!!k&&!i.dataset.s.includes(k)));
+ document.querySelectorAll('.sec').forEach(s=>{const v=s.querySelectorAll('.item:not(.hide)').length;s.classList.toggle('hide',!!k&&!v&&!edit);if(k&&v)s.classList.remove('collapsed')})}
+// ---- 拖曳（電腦滑鼠、手機手指都用抓把手）----
+let drag=null;
+function dragStart(e,el,si,ii){e.preventDefault();e.stopPropagation();try{el.setPointerCapture(e.pointerId)}catch(_){}drag={el,si,ii};el.classList.add('dragging');
+ const mv=ev=>{clearMarks();const t=document.elementFromPoint(ev.clientX,ev.clientY);if(!t)return;const it=t.closest('.item'),gr=t.closest('.grid');
+  if(it&&it!==el)it.classList.add('drop-before');else if(gr&&!it)gr.classList.add('drop-end')};
+ const up=ev=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);el.removeEventListener('pointercancel',up);
+  el.classList.remove('dragging');const t=document.elementFromPoint(ev.clientX,ev.clientY);clearMarks();
+  if(t){const it=t.closest('.item'),gr=t.closest('.grid');let ts=null,ti=null;
+   if(it&&it!==el){ts=+it.dataset.si;ti=+it.dataset.ii}else if(gr&&!it){ts=+gr.dataset.si;ti=state.sections[ts].items.length}
+   if(ts!==null)moveItem(drag.si,drag.ii,ts,ti)}drag=null};
+ el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up)}
+function clearMarks(){document.querySelectorAll('.drop-before,.drop-end').forEach(x=>x.classList.remove('drop-before','drop-end'))}
+function moveItem(fs,fi,ts,ti){const it=state.sections[fs].items.splice(fi,1)[0];if(fs===ts&&ti>fi)ti--;state.sections[ts].items.splice(ti,0,it);render();persist()}
+function moveSec(si,d){const j=si+d;if(j<0||j>=state.sections.length)return;const a=state.sections;[a[si],a[j]]=[a[j],a[si]];render();persist()}
+function delSec(si){const s=state.sections[si];if(s.items.length){alert('這一類還有 '+s.items.length+' 個網址，請先把它們搬到別的分類，再刪除分類。');return}
+ if(state.sections.length<=1){alert('至少要留一個分類。');return}if(confirm('確定刪除分類「'+s.title+'」？')){state.sections.splice(si,1);render();persist()}}
+// ---- 表單 ----
+function modal(title,fields,buttons){const mask=h('div',{class:'mask'});const box=h('div',{class:'modal'},h('h3',{},title));const inputs={};
+ fields.forEach(f=>{box.append(h('label',{},f.label));let el;if(f.options){el=h('select',{},f.options.map(o=>{const op=h('option',{value:o.v},o.t);if(o.v===f.value)op.selected=true;return op}))}else{el=h('input',{value:f.value||'',placeholder:f.ph||''})}inputs[f.key]=el;box.append(el)});
+ const close=()=>mask.remove();const acts=h('div',{class:'acts'});
+ buttons.forEach(b=>acts.append(h('button',{class:'btn '+(b.cls||''),onclick:()=>{const v={};for(const k in inputs)v[k]=inputs[k].value.trim();if(b.fn(v)!==false)close()}},b.t)));
+ acts.append(h('button',{class:'btn',onclick:close},'取消'));box.append(acts);mask.append(box);mask.addEventListener('pointerdown',e=>{if(e.target===mask)close()});document.body.append(mask);
+ const first=box.querySelector('input');if(first)first.focus()}
+function itemForm(si,ii){const adding=ii<0;const it=adding?{name:'',url:'',desc:'',tag:''}:state.sections[si].items[ii];
+ modal(adding?'新增網址':'編輯網址',[
+  {key:'name',label:'名稱',value:it.name},{key:'url',label:'網址（https://開頭）',value:it.url,ph:'https://'},{key:'desc',label:'說明（選填）',value:it.desc},{key:'tag',label:'標籤（選填，例如 查詢）',value:it.tag},
+  {key:'sec',label:'放在哪一類',value:String(si),options:state.sections.map((s,i)=>({v:String(i),t:(s.icon?s.icon+' ':'')+s.title}))}],
+  [{t:'💾 儲存',fn:v=>{if(!/^https?:\/\//.test(v.url)){alert('網址要用 https:// 開頭');return false}
+    const n={name:v.name||v.url,url:v.url,desc:v.desc,tag:v.tag};const ts=+v.sec;
+    if(adding){state.sections[ts].items.push(n)}else{const old=state.sections[si].items;if(ts===si)old[ii]=n;else{old.splice(ii,1);state.sections[ts].items.push(n)}}
+    state.removed=(state.removed||[]).filter(u=>u!==n.url);render();persist()}},
+   ...(adding?[]:[{t:'▲ 上移',fn:()=>{if(ii>0){moveItem(si,ii,si,ii-1)}}},{t:'▼ 下移',fn:()=>{if(ii<state.sections[si].items.length-1){moveItem(si,ii,si,ii+2)}}},
+    {t:'🗑 刪除',cls:'danger',fn:()=>{if(!confirm('確定刪除「'+it.name+'」？'))return false;state.sections[si].items.splice(ii,1);(state.removed=state.removed||[]).push(it.url);render();persist()}}])])}
+function secForm(si){const adding=si<0;const s=adding?{icon:'📁',title:''}:state.sections[si];
+ modal(adding?'新增分類':'改分類名稱',[{key:'icon',label:'符號（一個表情符號，選填）',value:s.icon},{key:'title',label:'分類名稱',value:s.title}],
+  [{t:'💾 儲存',fn:v=>{if(!v.title){alert('請輸入分類名稱');return false}
+    if(adding)state.sections.push({id:'s'+Date.now().toString(36),icon:v.icon,title:v.title,collapsed:false,items:[]});else{s.icon=v.icon;s.title=v.title}render();persist()}}])}
+// ---- 儲存與載入 ----
+function setStatus(t,err){const s=$('#status');s.textContent=t;s.classList.toggle('err',!!err)}
+function persist(){try{localStorage.setItem(CACHE,JSON.stringify(state));localStorage.setItem(DIRTY,'1')}catch(e){}
+ setStatus('儲存中…');clearTimeout(saveTimer);saveTimer=setTimeout(push,500)}
+function push(){fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:state}),keepalive:true})
+ .then(r=>r.ok?(setStatus('✓ 已儲存，所有裝置都會看到'),localStorage.removeItem(DIRTY)):Promise.reject(r.status)).catch(()=>setStatus('⚠ 儲存失敗，稍後再試（已先存在這台裝置）',true))}
+$('#editBtn').onclick=()=>{edit=!edit;render()};$('#addSec').onclick=()=>secForm(-1);$('#q').addEventListener('input',applySearch);
+addEventListener('pagehide',()=>{if(saveTimer){clearTimeout(saveTimer);push()}});
+let cached=null;try{cached=JSON.parse(localStorage.getItem(CACHE)||'null')}catch(e){}
+state=merge(cached&&cached.sections?cached:defaults());render();
+fetch(API).then(r=>r.json()).then(j=>{if(localStorage.getItem(DIRTY)){push();return} // 這台有還沒送出去的修改，先送出，不被伺服器舊版蓋掉
+ if(j&&j.data&&j.data.sections){state=merge(j.data);try{localStorage.setItem(CACHE,JSON.stringify(state))}catch(e){}render()}}).catch(()=>{});
+</script></body></html>
