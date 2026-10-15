@@ -31,6 +31,8 @@ S=[
 ("大樹教練待辦事項","https://event.bymyway.com/todo","特助主動提醒版","查詢"),
 ("2026 企業 AI 導入與政府補助需求調查","https://docs.google.com/forms/d/e/1FAIpQLSdCIH8ffceaxzxoTEZhd4ZaJlPVLMw9unkoHtUm_HOyD6v43g/viewform","Google 表單","表單"),
 ("字級大小對照表","https://coach1973.github.io/coach888/font-scale.html","大樹AI工具箱的字級參考","工具"),
+("大樹策展中心｜上傳網址","https://event.bymyway.com/curation/upload","店家／品牌網站上傳，一條龍上架策展中心","查詢"),
+("榮樹下｜來賓卡","https://event.bymyway.com/rongtree/a/b99f99e2f2b0","榮樹下來賓資料與 AI 來賓卡（專屬連結）","查詢"),
 ]),
 ("works","🎨","大樹作品・策展頁",[
 ("大臺南商圈整合計劃・大台南策展中心","https://event.bymyway.com/tainan-shangquan/","免費為店家建站、開通頻道","策展"),
@@ -44,7 +46,6 @@ S=[
 ("教練與軍師：深夜的 32MB 封包攻防戰 第1話","https://www.tava-ai.com/chat/b72pvmh9x1/index.html","TAVA 做的漫畫","漫畫"),
 ("大樹的答案 ── 漫畫版","https://event.bymyway.com/curated/answer/","日系漫畫版思想漫畫","漫畫"),
 ("大樹教練｜企業成長條漫 EP01–EP05","https://event.bymyway.com/curated/answer2/","全五話條漫","漫畫"),
-("榮樹下｜來賓卡","https://event.bymyway.com/rongtree/a/b99f99e2f2b0","榮樹下來賓資料與 AI 來賓卡（專屬連結）","榮樹下"),
 ]),
 ]
 n=sum(len(s[3]) for s in S)

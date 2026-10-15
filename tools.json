@@ -162,6 +162,18 @@
     "url": "https://coach1973.github.io/coach888/font-scale.html",
     "desc": "大樹AI工具箱的字級參考",
     "tag": "工具"
+   },
+   {
+    "name": "大樹策展中心｜上傳網址",
+    "url": "https://event.bymyway.com/curation/upload",
+    "desc": "店家／品牌網站上傳，一條龍上架策展中心",
+    "tag": "查詢"
+   },
+   {
+    "name": "榮樹下｜來賓卡",
+    "url": "https://event.bymyway.com/rongtree/a/b99f99e2f2b0",
+    "desc": "榮樹下來賓資料與 AI 來賓卡（專屬連結）",
+    "tag": "查詢"
    }
   ]
  },
@@ -235,12 +247,6 @@
     "url": "https://event.bymyway.com/curated/answer2/",
     "desc": "全五話條漫",
     "tag": "漫畫"
-   },
-   {
-    "name": "榮樹下｜來賓卡",
-    "url": "https://event.bymyway.com/rongtree/a/b99f99e2f2b0",
-    "desc": "榮樹下來賓資料與 AI 來賓卡（專屬連結）",
-    "tag": "榮樹下"
    }
   ]
  }
