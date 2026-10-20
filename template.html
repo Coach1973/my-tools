@@ -48,6 +48,8 @@ a.item:hover{border-color:var(--gold);background:#1a1a1a}
 .dragging{opacity:.4}
 .addrow{display:none;margin-top:8px}.editing .addrow{display:block}
 .hide{display:none!important}
+.trashbox{max-width:1500px;margin:0 auto}
+.restore{margin-top:10px}
 .foot{max-width:1500px;margin:40px auto 0;color:rgba(255,255,255,.5);font-size:20px}
 .mask{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
 .modal{background:#181818;border:1px solid var(--gold);border-radius:14px;padding:22px;width:100%;max-width:560px;max-height:92vh;overflow:auto}
@@ -62,29 +64,60 @@ a.item:hover{border-color:var(--gold);background:#1a1a1a}
 <div class="bar"><input class="search" id="q" type="search" placeholder="🔍 搜尋：名稱／網址／說明">
 <button class="btn" id="editBtn">✏️ 編輯排版</button>
 <button class="btn" id="bulkBtn">☑️ 批量搬移模式</button>
+<button class="btn" id="trashBtn">🗑 已刪除（0）</button>
 <button class="btn hide" id="addSec">＋新增分類</button>
 <span class="status" id="status"></span></div></div>
 <div class="wrap" id="wrap"></div>
+<div class="trashbox" id="trash"></div>
 <div class="bulk-bar" id="bulkBar"><span>已勾選 <span class="cnt" id="bulkCnt">0</span> 個項目</span>
 <select id="bulkTo"></select><button class="btn" id="bulkMove">搬移到這個分類</button>
 <button class="btn danger" id="bulkDel">🗑 刪除勾選項目</button></div>
-<div class="foot">按「✏️ 編輯排版」可以自己改分類名稱、拖曳或用「⋯」搬項目、新增與刪除網址；按「☑️ 批量搬移模式」可以勾選多個網址，一次搬到指定分類或刪除；改完自動儲存，每台裝置看到的都一樣。</div>
+<div class="foot">按「✏️ 編輯排版」可以自己改分類名稱、拖曳或用「⋯」搬項目、新增與刪除網址；按「☑️ 批量搬移模式」可以勾選多個網址，一次搬到指定分類或刪除；刪掉的網址會先放到最下面的「🗑 已刪除」，隨時可以按「↩ 復原」；改完自動儲存，每台裝置看到的都一樣。</div>
 <script>
 const DEFAULTS=__DEFAULTS__;
 const DIRTY='mytools_dirty_v1';
 const API='https://event.bymyway.com/api/mytools/state';
 const CACHE='mytools_state_v1';
-let state=null,edit=false,bulk=false,saveTimer=null;const sel=new Set();
+let state=null,edit=false,bulk=false,saveTimer=null,trashOpen=false,pendingMsg='';const sel=new Set();
 const $=s=>document.querySelector(s);
 function h(tag,attrs,...kids){const e=document.createElement(tag);for(const k in(attrs||{})){if(k==='class')e.className=attrs[k];else if(k.startsWith('on'))e[k]=attrs[k];else e.setAttribute(k,attrs[k])}
  kids.flat().forEach(c=>e.append(c instanceof Node?c:document.createTextNode(c)));return e}
 function host(u){try{const p=new URL(u);return p.host+(p.pathname==='/'?'':p.pathname.replace(/\/$/,''))}catch(e){return u}}
 function clone(o){return JSON.parse(JSON.stringify(o))}
-function defaults(){return{sections:DEFAULTS.map(s=>({id:s.id,icon:s.icon,title:s.title,collapsed:false,items:clone(s.items)})),removed:[]}}
+function defaults(){return{sections:DEFAULTS.map(s=>({id:s.id,icon:s.icon,title:s.title,collapsed:false,items:clone(s.items)})),removed:[],trash:[]}}
 function merge(st){ // 之後在原始清單新增的網址，伺服器版沒有、也沒被刪過 → 自動補進對應分類
- const known=new Set(st.removed||[]);st.sections.forEach(s=>s.items.forEach(i=>known.add(i.url)));
- DEFAULTS.forEach(d=>d.items.forEach(i=>{if(!known.has(i.url)){const t=st.sections.find(s=>s.id===d.id)||st.sections[0];t.items.push(clone(i))}}));return st}
+ st.trash=Array.isArray(st.trash)?st.trash.filter(t=>t&&t.url):[];
+ const known=new Set(st.removed||[]);st.sections.forEach(s=>s.items.forEach(i=>known.add(i.url)));st.trash.forEach(t=>known.add(t.url));
+ DEFAULTS.forEach(d=>d.items.forEach(i=>{if(!known.has(i.url)){const t=st.sections.find(s=>s.id===d.id)||st.sections[0];t.items.push(clone(i))}}));
+ // 已刪除：舊版刪除只記了網址，這裡補成可以復原的項目（名稱取原始清單，原始清單沒有就顯示網址）
+ const live=new Set(),seen=new Set(),dead=[];st.sections.forEach(s=>s.items.forEach(i=>live.add(i.url)));
+ st.trash.forEach(t=>{if(!live.has(t.url)&&!seen.has(t.url)){seen.add(t.url);dead.push(t)}});
+ (st.removed||[]).forEach(u=>{if(live.has(u)||seen.has(u))return;seen.add(u);let hit=null;
+  DEFAULTS.forEach(d=>d.items.forEach(i=>{if(i.url===u)hit=Object.assign(clone(i),{from:d.id})}));dead.push(hit||{name:host(u),url:u,desc:'',tag:'',from:null})});
+ st.trash=dead;st.removed=[...new Set([...(st.removed||[]),...dead.map(t=>t.url)])];return st}
 function countAll(){return state.sections.reduce((n,s)=>n+s.items.length,0)}
+// ---- 已刪除：刪掉的網址先放這裡，可以復原（跟「大樹作品一覽」的「最近刪除」同一個精神）----
+function toTrash(it,sid){state.trash=(state.trash||[]).filter(t=>t.url!==it.url);
+ state.trash.unshift({name:it.name,url:it.url,desc:it.desc||'',tag:it.tag||'',from:sid||null});
+ state.removed=state.removed||[];if(!state.removed.includes(it.url))state.removed.push(it.url)}
+function restoreItem(ti){const t=state.trash[ti];if(!t)return;
+ const sec=state.sections.find(s=>s.id===t.from)||state.sections[0];
+ if(!state.sections.some(s=>s.items.some(i=>i.url===t.url)))sec.items.push({name:t.name,url:t.url,desc:t.desc||'',tag:t.tag||''});
+ state.trash.splice(ti,1);state.removed=(state.removed||[]).filter(u=>u!==t.url);
+ render();persist('已復原「'+t.name+'」到「'+sec.title+'」')}
+function trashEl(t,ti){const from=state.sections.find(s=>s.id===t.from);
+ const where=from?'原本在：'+(from.icon?from.icon+' ':'')+from.title:'原本的分類沒有記錄，復原時放回「'+state.sections[0].title+'」';
+ const a=h('div',{class:'item'},h('div',{class:'num'},String(ti+1)),
+  h('div',{class:'mid'},h('div',{class:'name'},t.name),h('div',{class:'url'},host(t.url)),t.desc?h('div',{class:'desc'},t.desc):'',h('div',{class:'desc'},where),h('button',{class:'btn restore',onclick:()=>restoreItem(ti)},'↩ 復原')),
+  t.tag?h('div',{class:'badge'},t.tag):'');
+ a.dataset.s=(t.name+' '+t.url+' '+(t.desc||'')+' '+(t.tag||'')).toLowerCase();return a}
+function renderTrash(){const n=state.trash.length;$('#trashBtn').textContent='🗑 已刪除（'+n+'）';
+ const grid=h('div',{class:'grid'});state.trash.forEach((t,ti)=>grid.append(trashEl(t,ti)));
+ if(!n)grid.append(h('div',{class:'desc'},'目前沒有已刪除的網址。刪掉的網址會放在這裡，隨時可以復原。'));
+ const title=h('div',{class:'sec-title',onclick:()=>{trashOpen=!trashOpen;sec.classList.toggle('collapsed',!trashOpen)}},
+  h('span',{class:'arrow'},'▼'),'🗑 已刪除',h('span',{class:'count'},n+'項'));
+ const sec=h('section',{class:'sec'+(trashOpen?'':' collapsed'),id:'trashSec'},title,grid);
+ const box=$('#trash');box.textContent='';box.append(sec)}
 function render(){
  $('#sub').textContent='共 '+countAll()+' 個網址，分 '+state.sections.length+' 類。點名稱開新分頁；點分類標題可收合；上方可搜尋。';
  document.body.classList.toggle('editing',edit);document.body.classList.toggle('bulking',bulk);$('#bulkBtn').textContent=bulk?'✅ 結束批量搬移':'☑️ 批量搬移模式';$('#bulkBtn').classList.toggle('on',bulk);fillBulk();$('#editBtn').textContent=edit?'✅ 完成編輯':'✏️ 編輯排版';$('#editBtn').classList.toggle('on',edit);$('#addSec').classList.toggle('hide',!edit);
@@ -102,7 +135,7 @@ function render(){
   const sec=h('section',{class:'sec'+(s.collapsed?' collapsed':'')},title,grid,
    h('div',{class:'addrow'},h('button',{class:'btn',onclick:()=>itemForm(si,-1)},'＋新增網址到這一類')));
   wrap.append(sec)});
- applySearch()}
+ renderTrash();applySearch()}
 function itemEl(it,si,ii){
  const box=h('span',{class:'bulk-checkbox'},sel.has(it)?'☑':'☐');
  const inner=[h('div',{class:'handle',title:'拖曳搬動'},'⠿'),box,h('div',{class:'num'},String(ii+1)),
@@ -142,8 +175,8 @@ function bulkMove(){if(!sel.size){setStatus('請先勾選要搬移的項目',tru
  t.items.push(...moved);sel.clear();render();
  if(!moved.length){setStatus('勾選的網址本來就在「'+t.title+'」');return}persist()}
 function bulkDel(){if(!sel.size){setStatus('請先勾選要刪除的項目',true);return}
- if(!confirm('確定刪除勾選的 '+sel.size+' 個網址？'))return;
- state.sections.forEach(s=>{s.items=s.items.filter(i=>{if(sel.has(i)){(state.removed=state.removed||[]).push(i.url);return false}return true})});sel.clear();render();persist()}
+ const n=sel.size;
+ state.sections.forEach(s=>{s.items=s.items.filter(i=>{if(sel.has(i)){toTrash(i,s.id);return false}return true})});sel.clear();render();persist('已把 '+n+' 個網址移到「已刪除」，可以復原')}
 // ---- 表單 ----
 function modal(title,fields,buttons){const mask=h('div',{class:'mask'});const box=h('div',{class:'modal'},h('h3',{},title));const inputs={};
  fields.forEach(f=>{box.append(h('label',{},f.label));let el;if(f.options){el=h('select',{},f.options.map(o=>{const op=h('option',{value:o.v},o.t);if(o.v===f.value)op.selected=true;return op}))}else{el=h('input',{value:f.value||'',placeholder:f.ph||''})}inputs[f.key]=el;box.append(el)});
@@ -158,20 +191,20 @@ function itemForm(si,ii){const adding=ii<0;const it=adding?{name:'',url:'',desc:
   [{t:'💾 儲存',fn:v=>{if(!/^https?:\/\//.test(v.url)){alert('網址要用 https:// 開頭');return false}
     const n={name:v.name||v.url,url:v.url,desc:v.desc,tag:v.tag};const ts=+v.sec;
     if(adding){state.sections[ts].items.push(n)}else{const old=state.sections[si].items;if(ts===si)old[ii]=n;else{old.splice(ii,1);state.sections[ts].items.push(n)}}
-    state.removed=(state.removed||[]).filter(u=>u!==n.url);render();persist()}},
+    state.removed=(state.removed||[]).filter(u=>u!==n.url);state.trash=(state.trash||[]).filter(t=>t.url!==n.url);render();persist()}},
    ...(adding?[]:[{t:'▲ 上移',fn:()=>{if(ii>0){moveItem(si,ii,si,ii-1)}}},{t:'▼ 下移',fn:()=>{if(ii<state.sections[si].items.length-1){moveItem(si,ii,si,ii+2)}}},
-    {t:'🗑 刪除',cls:'danger',fn:()=>{if(!confirm('確定刪除「'+it.name+'」？'))return false;state.sections[si].items.splice(ii,1);(state.removed=state.removed||[]).push(it.url);render();persist()}}])])}
+    {t:'🗑 刪除',cls:'danger',fn:()=>{toTrash(it,state.sections[si].id);state.sections[si].items.splice(ii,1);render();persist('已把「'+it.name+'」移到「已刪除」，可以復原')}}])])}
 function secForm(si){const adding=si<0;const s=adding?{icon:'📁',title:''}:state.sections[si];
  modal(adding?'新增分類':'改分類名稱',[{key:'icon',label:'符號（一個表情符號，選填）',value:s.icon},{key:'title',label:'分類名稱',value:s.title}],
   [{t:'💾 儲存',fn:v=>{if(!v.title){alert('請輸入分類名稱');return false}
     if(adding)state.sections.push({id:'s'+Date.now().toString(36),icon:v.icon,title:v.title,collapsed:false,items:[]});else{s.icon=v.icon;s.title=v.title}render();persist()}}])}
 // ---- 儲存與載入 ----
 function setStatus(t,err){const s=$('#status');s.textContent=t;s.classList.toggle('err',!!err)}
-function persist(){try{localStorage.setItem(CACHE,JSON.stringify(state));localStorage.setItem(DIRTY,'1')}catch(e){}
- setStatus('儲存中…');clearTimeout(saveTimer);saveTimer=setTimeout(push,500)}
+function persist(msg){try{localStorage.setItem(CACHE,JSON.stringify(state));localStorage.setItem(DIRTY,'1')}catch(e){}
+ pendingMsg=msg||'';setStatus((pendingMsg?pendingMsg+'｜':'')+'儲存中…');clearTimeout(saveTimer);saveTimer=setTimeout(push,500)}
 function push(){fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:state}),keepalive:true})
- .then(r=>r.ok?(setStatus('✓ 已儲存，所有裝置都會看到'),localStorage.removeItem(DIRTY)):Promise.reject(r.status)).catch(()=>setStatus('⚠ 儲存失敗，稍後再試（已先存在這台裝置）',true))}
-$('#editBtn').onclick=()=>{edit=!edit;render()};$('#bulkBtn').onclick=()=>{bulk=!bulk;if(!bulk)sel.clear();render()};$('#bulkMove').onclick=bulkMove;$('#bulkDel').onclick=bulkDel;$('#addSec').onclick=()=>secForm(-1);$('#q').addEventListener('input',applySearch);
+ .then(r=>r.ok?(setStatus((pendingMsg?pendingMsg+'｜':'')+'✓ 已儲存，所有裝置都會看到'),localStorage.removeItem(DIRTY)):Promise.reject(r.status)).catch(()=>setStatus('⚠ 儲存失敗，稍後再試（已先存在這台裝置）',true))}
+$('#editBtn').onclick=()=>{edit=!edit;render()};$('#bulkBtn').onclick=()=>{bulk=!bulk;if(!bulk)sel.clear();render()};$('#bulkMove').onclick=bulkMove;$('#bulkDel').onclick=bulkDel;$('#trashBtn').onclick=()=>{trashOpen=true;renderTrash();applySearch();$('#trashSec').scrollIntoView({behavior:'smooth',block:'start'})};$('#addSec').onclick=()=>secForm(-1);$('#q').addEventListener('input',applySearch);
 addEventListener('pagehide',()=>{if(saveTimer){clearTimeout(saveTimer);push()}});
 let cached=null;try{cached=JSON.parse(localStorage.getItem(CACHE)||'null')}catch(e){}
 state=merge(cached&&cached.sections?cached:defaults());render();
