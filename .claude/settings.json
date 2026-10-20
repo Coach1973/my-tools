@@ -1,0 +1,34 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "F=\"$CLAUDE_PROJECT_DIR/.claude/coach-rules/session_start.sh\"; [ -f \"$F\" ] && bash \"$F\"; exit 0"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "F=\"$CLAUDE_PROJECT_DIR/.claude/coach-rules/prompt_hook.sh\"; [ -f \"$F\" ] && bash \"$F\"; exit 0"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "F=\"$CLAUDE_PROJECT_DIR/.claude/coach-rules/stop_check.py\"; [ -f \"$F\" ] && python3 \"$F\"; exit 0"
+          }
+        ]
+      }
+    ]
+  }
+}
