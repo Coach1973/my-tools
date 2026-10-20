@@ -1,222 +1,786 @@
 <!DOCTYPE html>
-<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>大樹的常用查詢網站（個人專用）</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&amp;display=swap" rel="stylesheet"/>
+<!-- 2026-10-21 照抄大樹作品一覽（Coach1973/coach888 的 index.html）重做：畫面、操作、提示字一模一樣，
+     只換資料（tools.json → build.py 的 __DEFAULTS__）與存檔端點（/api/mytools/state）。
+     字級依教練規定最小 20px，所以字比作品一覽大一號。 -->
 <style>
-:root{--gold:#c8a96e;--dark:#0a0a0a;--dark2:#141414;--line:rgba(200,169,110,.3)}
-*{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Noto Sans TC',sans-serif;font-size:20px;background:var(--dark);color:#fff;padding:36px 20px 120px}
-button,input,select{font:inherit;font-size:20px}
-.wrap{max-width:1500px;margin:0 auto;column-count:2;column-gap:48px}
-.head{max-width:1500px;margin:0 auto}
-h1{font-size:32px;font-weight:900;margin-bottom:6px}h1 span{color:var(--gold)}
-.sub{color:rgba(255,255,255,.6);font-size:20px;margin-bottom:18px}
-.bar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:28px}
-.search{flex:1 1 360px;max-width:560px;background:var(--dark2);border:1px solid var(--line);color:#fff;border-radius:10px;padding:12px 16px}
-.search:focus{outline:none;border-color:var(--gold)}
-.btn{background:var(--dark2);color:var(--gold);border:1px solid var(--line);border-radius:10px;padding:10px 18px;cursor:pointer;font-weight:700}
-.btn:hover{border-color:var(--gold)}.btn.on{background:var(--gold);color:#000}
-.btn.danger{color:#ff7a7a;border-color:rgba(255,122,122,.4)}
-.status{color:rgba(255,255,255,.6)}.status.err{color:#ff7a7a}
-.sec{break-inside:avoid;display:inline-block;width:100%}
-.sec-title{display:flex;align-items:center;gap:10px;margin:40px 0 16px;font-size:24px;font-weight:900;color:var(--gold);cursor:pointer;user-select:none;flex-wrap:wrap}
-.sec-title::after{content:'';flex:1;height:1px;background:var(--line);order:3;min-width:30px}
-.sec-title .count{font-size:20px;color:rgba(255,255,255,.5);font-weight:700;order:2}
-.arrow{font-size:20px;color:rgba(255,255,255,.5);transition:transform .2s}
-.sec.collapsed .arrow{transform:rotate(-90deg)}.sec.collapsed .grid,.sec.collapsed .addrow{display:none}
-.sec-tools{display:none;gap:8px;order:4;width:100%}
-.editing .sec-tools{display:flex;flex-wrap:wrap}
-.grid{display:flex;flex-direction:column;gap:8px;min-height:20px}
-.item{display:flex;align-items:center;gap:12px;color:#fff;text-decoration:none;background:var(--dark2);border:1px solid var(--line);border-radius:10px;padding:10px 14px 10px 10px;transition:.2s}
-a.item:hover{border-color:var(--gold);background:#1a1a1a}
-.num{flex-shrink:0;width:42px;height:42px;border-radius:8px;background:#1c1c1c;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:20px;color:var(--gold);border:1px solid var(--line)}
-.mid{flex:1;min-width:0}.name{font-weight:700;font-size:22px}
-.url{font-size:20px;color:rgba(255,255,255,.45);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.desc{font-size:20px;color:rgba(255,255,255,.65);margin-top:2px}
-.badge{font-size:20px;font-weight:900;padding:3px 12px;border-radius:999px;flex-shrink:0;background:rgba(200,169,110,.15);color:var(--gold)}
-.handle{display:none;font-size:28px;color:var(--gold);cursor:grab;touch-action:none;padding:0 6px;user-select:none}
-.editing .handle{display:block}
-.more{display:none}.editing .more{display:block}
-.bulk-checkbox{display:none;flex-shrink:0;font-size:30px;line-height:1;color:var(--gold);user-select:none}
-.bulking .bulk-checkbox{display:block}.bulking a.item{cursor:pointer}
-.item.selected{border-color:var(--gold);background:rgba(200,169,110,.12)}
-.sec-sel{display:none;padding:4px 12px}.bulking .sec-sel{display:inline-block}
-.bulk-bar{position:fixed;left:0;right:0;bottom:0;background:#151107;border-top:2px solid var(--gold);padding:14px 20px;display:none;align-items:center;gap:12px;flex-wrap:wrap;z-index:40;box-shadow:0 -4px 16px rgba(0,0,0,.4)}
-.bulking .bulk-bar{display:flex}.bulk-bar .cnt{color:var(--gold);font-weight:900}
-.bulk-bar select{background:#1c1c1c;color:#fff;border:1px solid var(--line);border-radius:8px;padding:8px 12px;max-width:100%}
-.drop-before{box-shadow:0 -4px 0 0 var(--gold)}.grid.drop-end{box-shadow:0 4px 0 0 var(--gold)}
-.dragging{opacity:.4}
-.addrow{display:none;margin-top:8px}.editing .addrow{display:block}
-.hide{display:none!important}
-.trashbox{max-width:1500px;margin:0 auto}
-.restore{margin-top:10px}
-.foot{max-width:1500px;margin:40px auto 0;color:rgba(255,255,255,.5);font-size:20px}
-.mask{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
-.modal{background:#181818;border:1px solid var(--gold);border-radius:14px;padding:22px;width:100%;max-width:560px;max-height:92vh;overflow:auto}
-.modal h3{font-size:24px;color:var(--gold);margin-bottom:14px}
-.modal label{display:block;margin:12px 0 4px;color:rgba(255,255,255,.7)}
-.modal input,.modal select{width:100%;background:var(--dark);border:1px solid var(--line);color:#fff;border-radius:8px;padding:10px 12px}
-.modal .acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
-@media(max-width:900px){.wrap{column-count:1}}
-</style></head><body>
-<div class="head"><h1>大樹的常用查詢網站<span>｜個人專用</span></h1>
-<p class="sub" id="sub"></p>
-<div class="bar"><input class="search" id="q" type="search" placeholder="🔍 搜尋：名稱／網址／說明">
-<button class="btn" id="editBtn">✏️ 編輯排版</button>
-<button class="btn" id="bulkBtn">☑️ 批量搬移模式</button>
-<button class="btn" id="trashBtn">🗑 最近刪除（0）</button>
-<button class="btn hide" id="addSec">＋新增分類</button>
-<span class="status" id="status"></span></div></div>
-<div class="wrap" id="wrap"></div>
-<div class="trashbox" id="trash"></div>
-<div class="bulk-bar" id="bulkBar"><span>已勾選 <span class="cnt" id="bulkCnt">0</span> 個項目</span>
-<select id="bulkTo"></select><button class="btn" id="bulkMove">搬移到這個分類</button>
-<button class="btn danger" id="bulkDel">🗑 刪除勾選項目</button></div>
-<div class="foot">按「✏️ 編輯排版」可以自己改分類名稱、拖曳或用「⋯」搬項目、新增與刪除網址；按「☑️ 批量搬移模式」可以勾選多個網址，一次搬到指定分類或刪除；刪掉的網址會先放到最下面的「🗑 最近刪除」，隨時可以按「↩ 復原」；改完自動儲存，每台裝置看到的都一樣。</div>
+  :root { --gold:#c8a96e; --dark:#0a0a0a; --dark2:#141414; --line:rgba(200,169,110,.3); }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans TC', sans-serif; font-size:20px; background:var(--dark); color:#fff; padding:36px 20px 100px; }
+  .wrap { max-width:1500px; margin:0 auto; column-count:2; column-gap:48px; }
+  .section-block { break-inside:avoid; -webkit-column-break-inside:avoid; display:inline-block; width:100%; }
+  @media (max-width:900px){
+    .wrap { column-count:1; }
+  }
+  h1 { font-size:32px; font-weight:900; margin-bottom:6px; }
+  h1 span { color:var(--gold); }
+  .sub { color:rgba(255,255,255,.5); font-size:20px; margin-bottom:18px; }
+  .toolbar { display:flex; gap:12px; align-items:center; margin-bottom:28px; flex-wrap:wrap; }
+  .btn-copy {
+    background:rgba(200,169,110,.12); border:1px solid var(--gold); color:var(--gold);
+    font-family:inherit; font-size:20px; font-weight:900; padding:10px 18px; border-radius:10px;
+    cursor:pointer; transition:.2s;
+  }
+  .btn-copy:hover { background:rgba(200,169,110,.25); }
+  .toast {
+    position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--gold); color:#151107; font-weight:900; font-size:20px;
+    padding:14px 28px; border-radius:12px; opacity:0; pointer-events:none;
+    transition:.25s; z-index:999; box-shadow:0 8px 24px rgba(0,0,0,.4);
+    max-width:calc(100vw - 32px); width:max-content;
+  }
+  .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  .section-title {
+    display:flex; align-items:center; gap:12px; margin:40px 0 16px;
+    font-size:24px; font-weight:900; color:var(--gold);
+  }
+  .section-title .count { font-size:20px; color:rgba(255,255,255,.4); font-weight:700; white-space:nowrap; }
+  .section-title::after { content:''; flex:1; height:1px; background:var(--line); }
+  .section-drag-handle {
+    flex-shrink:0; width:20px; text-align:center; cursor:grab; user-select:none;
+    color:rgba(255,255,255,.3); font-size:20px; letter-spacing:-2px; transition:.2s; touch-action:none;
+  }
+  .section-drag-handle:hover { color:var(--gold); }
+  .section-drag-handle:active { cursor:grabbing; }
+  .section-block.section-dragging { opacity:.4; border:1px dashed var(--gold); border-radius:12px; }
+  .grid { display:flex; flex-direction:column; gap:8px; }
+  .item {
+    display:flex; align-items:center; gap:12px; color:#fff;
+    background:var(--dark2); border:1px solid var(--line); border-radius:10px;
+    padding:10px 14px 10px 8px; transition:border-color .2s, background .2s;
+  }
+  .item:hover { border-color:var(--gold); background:#1a1a1a; }
+  .item.dragging { opacity:.35; border-style:dashed; }
+  .drag-handle {
+    flex-shrink:0; width:28px; height:34px; display:flex; align-items:center; justify-content:center;
+    color:rgba(255,255,255,.3); cursor:grab; font-size:20px; letter-spacing:-2px; touch-action:none;
+    border-radius:6px; transition:.2s;
+  }
+  .drag-handle:hover { color:var(--gold); background:rgba(200,169,110,.1); }
+  .drag-handle:active { cursor:grabbing; }
+  .num {
+    flex-shrink:0; width:40px; height:40px; border-radius:8px; background:#1c1c1c;
+    display:flex; align-items:center; justify-content:center; font-weight:900;
+    font-size:20px; color:var(--gold); border:1px solid var(--line);
+  }
+  .name { font-weight:700; font-size:21px; flex:1; min-width:0; overflow-wrap:anywhere; color:#fff; text-decoration:none; }
+  .name:hover { text-decoration:underline; }
+  .url { font-size:20px; color:rgba(255,255,255,.35); font-variant-numeric:tabular-nums; max-width:40%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .badge {
+    font-size:20px; font-weight:900; padding:3px 12px; border-radius:999px; flex-shrink:0;
+  }
+  .badge:empty { min-width:44px; min-height:34px; }
+  .badge.star { background:rgba(200,169,110,.25); color:var(--gold); }
+  .note { font-size:20px; color:rgba(255,255,255,.4); padding:10px 18px; }
+  .title-text, .badge { cursor:text; }
+  .title-text:focus, .badge:focus { outline:1px dashed var(--gold); border-radius:4px; }
+  .toggle-arrow {
+    cursor:pointer; flex-shrink:0; width:20px; text-align:center; user-select:none;
+    color:rgba(255,255,255,.4); font-size:20px; transition:transform .2s, color .2s;
+  }
+  .toggle-arrow:hover { color:var(--gold); }
+  .section-block.collapsed .toggle-arrow { transform:rotate(-90deg); }
+  .section-block.collapsed .grid, .section-block.collapsed .note, .section-block.collapsed .btn-add-item { display:none; }
+  .section-del {
+    cursor:pointer; flex-shrink:0; font-size:20px; opacity:.35; transition:opacity .2s;
+  }
+  .section-del:hover { opacity:1; }
+  .item-del {
+    cursor:pointer; flex-shrink:0; color:rgba(255,255,255,.3); font-size:20px; font-weight:900;
+    padding:0 2px; transition:color .2s;
+  }
+  .item-del:hover { color:#ff6b6b; }
+  .hot-item-del {
+    cursor:pointer; flex-shrink:0; color:rgba(255,255,255,.3); font-size:20px; font-weight:900;
+    padding:0 2px; transition:color .2s;
+  }
+  .hot-item-del:hover { color:#ff6b6b; }
+  .btn-add-item {
+    display:block; width:100%; margin-top:6px; background:transparent; border:1px dashed var(--line);
+    color:rgba(255,255,255,.4); border-radius:10px; padding:8px 14px; font-size:20px; font-weight:700;
+    cursor:pointer; text-align:center; font-family:inherit; transition:.2s;
+  }
+  .btn-add-item:hover { border-color:var(--gold); color:var(--gold); background:rgba(200,169,110,.08); }
+  .btn-add-section {
+    background:transparent; border:1px dashed var(--gold); color:var(--gold);
+    font-family:inherit; font-size:20px; font-weight:900; padding:10px 18px; border-radius:10px;
+    cursor:pointer; transition:.2s;
+  }
+  .btn-add-section:hover { background:rgba(200,169,110,.15); }
+  .bulk-checkbox { display:none; flex-shrink:0; width:22px; height:22px; cursor:pointer; accent-color:var(--gold); }
+  .wrap.bulk-mode .bulk-checkbox { display:inline-block; }
+  .item.selected { border-color:var(--gold); background:rgba(200,169,110,.1); }
+  .edit-name { cursor:pointer; flex-shrink:0; opacity:.3; font-size:20px; transition:opacity .2s; }
+  .edit-name:hover { opacity:1; }
+  .bulk-bar {
+    position:fixed; bottom:0; left:0; right:0; background:#151107; border-top:2px solid var(--gold);
+    padding:14px 20px; display:none; align-items:center; gap:12px; flex-wrap:wrap; z-index:1000;
+    box-shadow:0 -4px 16px rgba(0,0,0,.4); font-size:20px;
+  }
+  .bulk-bar.show { display:flex; }
+  .bulk-bar .count { color:var(--gold); font-weight:900; }
+  .bulk-bar select {
+    background:#1c1c1c; color:#fff; border:1px solid var(--line); border-radius:8px;
+    padding:8px 12px; font-family:inherit; font-size:20px; max-width:100%;
+  }
+  @media (max-width:520px){
+    body { padding-left:16px; padding-right:16px; }
+    .url { display:none; }
+    .name { font-size:20px; }
+    .item, .hot-item { gap:8px; padding-right:10px; }
+    .section-title { gap:8px; }
+  }
+  .hot-ranking-block { break-inside:avoid; -webkit-column-break-inside:avoid; display:inline-block; width:100%; }
+  .hot-ranking-title { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin:0 0 16px; font-size:24px; font-weight:900; color:var(--gold); }
+  .hot-ranking-sub { font-size:20px; color:rgba(255,255,255,.4); font-weight:700; }
+  .hot-grid { display:flex; flex-direction:column; gap:8px; }
+  .hot-item { display:flex; align-items:center; gap:12px; color:#fff; background:var(--dark2); border:1px solid var(--gold); border-radius:10px; padding:10px 14px; }
+  .hot-item:hover { background:#1a1a1a; }
+  .hot-rank { flex-shrink:0; width:36px; height:36px; border-radius:8px; background:rgba(200,169,110,.2); display:flex; align-items:center; justify-content:center; font-weight:900; font-size:20px; color:var(--gold); }
+  .hot-clicks { font-size:20px; color:rgba(255,255,255,.4); flex-shrink:0; white-space:nowrap; }
+  .hot-empty { font-size:20px; color:rgba(255,255,255,.35); padding:6px 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>大樹的常用查詢網站<span>｜個人專用</span></h1>
+<p class="sub">拖動左側 ⠿ 手把可調整順序，也可以拖到別的分類；點大項標題文字或右側標籤文字可直接修改，離開文字框自動記住；點名稱旁的✏️可改顯示名稱；編號跟項目數會自動更新；點名稱直接開啟連結。</p>
+<div class="toolbar">
+<button class="btn-copy" id="btnCopy">📋 複製目前排序（貼給AI固化進正式檔案）</button>
+<button class="btn-add-section" id="btnAddSection">➕ 新增分類</button>
+<button class="btn-add-section" id="btnBulkMode">☑️ 批量搬移模式</button>
+</div>
+<div class="hot-ranking-block" id="hotRankingBlock">
+<div class="hot-ranking-title">🔥 熱門排行 <span class="hot-ranking-sub">依點擊次數即時排名，不影響原本分類位置</span></div>
+<div class="hot-grid" id="hotRankingGrid"><div class="hot-empty">還沒有點擊紀錄，累積使用後這裡會自動排出你最常點的項目。</div></div>
+</div>
+<div class="section-block" id="recycleBinBlock">
+<div class="section-title" data-section="recentlydeleted"><span class="toggle-arrow" title="收合/展開">▼</span><span class="idx">🗑</span><span class="title-text" contenteditable="false" spellcheck="false">最近刪除</span> <span class="count">0項</span></div>
+<div class="grid" data-section="recentlydeleted"></div>
+<p class="note">刪除的項目會先放在這裡，不會直接消失；用上方「☑️批量搬移模式」勾選後可以移回想要的分類。確定不要了再按下面永久清空。</p>
+<button class="btn-add-item" id="btnEmptyRecycleBin">🗑 永久清空最近刪除</button>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+<div class="bulk-bar" id="bulkBar">
+<span>已勾選 <span class="count" id="bulkCount">0</span> 個項目</span>
+<select id="bulkTargetSelect"></select>
+<button class="btn-add-section" id="btnBulkMove">搬移到這個分類</button>
+</div>
 <script>
-const DEFAULTS=__DEFAULTS__;
-const DIRTY='mytools_dirty_v1';
-const API='https://event.bymyway.com/api/mytools/state';
-const CACHE='mytools_state_v1';
-let state=null,edit=false,bulk=false,saveTimer=null,trashOpen=false,pendingMsg='';const sel=new Set();
-const $=s=>document.querySelector(s);
-function h(tag,attrs,...kids){const e=document.createElement(tag);for(const k in(attrs||{})){if(k==='class')e.className=attrs[k];else if(k.startsWith('on'))e[k]=attrs[k];else e.setAttribute(k,attrs[k])}
- kids.flat().forEach(c=>e.append(c instanceof Node?c:document.createTextNode(c)));return e}
-function host(u){try{const p=new URL(u);return p.host+(p.pathname==='/'?'':p.pathname.replace(/\/$/,''))}catch(e){return u}}
-function clone(o){return JSON.parse(JSON.stringify(o))}
-function defaults(){return{sections:DEFAULTS.map(s=>({id:s.id,icon:s.icon,title:s.title,collapsed:false,items:clone(s.items)})),removed:[],trash:[]}}
-function merge(st){ // 之後在原始清單新增的網址，伺服器版沒有、也沒被刪過 → 自動補進對應分類
- st.trash=Array.isArray(st.trash)?st.trash.filter(t=>t&&t.url):[];
- const known=new Set(st.removed||[]);st.sections.forEach(s=>s.items.forEach(i=>known.add(i.url)));st.trash.forEach(t=>known.add(t.url));
- DEFAULTS.forEach(d=>d.items.forEach(i=>{if(!known.has(i.url)){const t=st.sections.find(s=>s.id===d.id)||st.sections[0];t.items.push(clone(i))}}));
- // 最近刪除：舊版刪除只記了網址，這裡補成可以復原的項目（名稱取原始清單，原始清單沒有就顯示網址）
- const live=new Set(),seen=new Set(),dead=[];st.sections.forEach(s=>s.items.forEach(i=>live.add(i.url)));
- st.trash.forEach(t=>{if(!live.has(t.url)&&!seen.has(t.url)){seen.add(t.url);dead.push(t)}});
- (st.removed||[]).forEach(u=>{if(live.has(u)||seen.has(u))return;seen.add(u);let hit=null;
-  DEFAULTS.forEach(d=>d.items.forEach(i=>{if(i.url===u)hit=Object.assign(clone(i),{from:d.id})}));dead.push(hit||{name:host(u),url:u,desc:'',tag:'',from:null})});
- st.trash=dead;st.removed=[...new Set([...(st.removed||[]),...dead.map(t=>t.url)])];return st}
-function countAll(){return state.sections.reduce((n,s)=>n+s.items.length,0)}
-// ---- 最近刪除：刪掉的網址先放這裡，可以復原（跟「大樹作品一覽」的「最近刪除」同一個精神）----
-function toTrash(it,sid){state.trash=(state.trash||[]).filter(t=>t.url!==it.url);
- state.trash.unshift({name:it.name,url:it.url,desc:it.desc||'',tag:it.tag||'',from:sid||null});
- state.removed=state.removed||[];if(!state.removed.includes(it.url))state.removed.push(it.url)}
-function restoreItem(ti){const t=state.trash[ti];if(!t)return;
- const sec=state.sections.find(s=>s.id===t.from)||state.sections[0];
- if(!state.sections.some(s=>s.items.some(i=>i.url===t.url)))sec.items.push({name:t.name,url:t.url,desc:t.desc||'',tag:t.tag||''});
- state.trash.splice(ti,1);state.removed=(state.removed||[]).filter(u=>u!==t.url);
- render();persist('已復原「'+t.name+'」到「'+sec.title+'」')}
-function purgeItem(ti){const t=state.trash[ti];if(!t)return;
- if(!confirm('確定要永久刪除「'+t.name+'」嗎？這個動作無法復原。'))return;
- state.trash.splice(ti,1);render();persist('已永久刪除「'+t.name+'」')}
-function emptyTrash(){const n=(state.trash||[]).length;if(!n){setStatus('最近刪除目前是空的');return}
- if(!confirm('確定要永久清空「最近刪除」的 '+n+' 個項目嗎？這個動作無法復原。'))return;
- state.trash=[];render();persist('已永久清空最近刪除')}
-function trashEl(t,ti){const from=state.sections.find(s=>s.id===t.from);
- const where=from?'原本在：'+(from.icon?from.icon+' ':'')+from.title:'原本的分類沒有記錄，復原時放回「'+state.sections[0].title+'」';
- const a=h('div',{class:'item'},h('div',{class:'num'},String(ti+1)),
-  h('div',{class:'mid'},h('div',{class:'name'},t.name),h('div',{class:'url'},host(t.url)),t.desc?h('div',{class:'desc'},t.desc):'',h('div',{class:'desc'},where),h('div',{class:'restore'},h('button',{class:'btn',onclick:()=>restoreItem(ti)},'↩ 復原'),' ',h('button',{class:'btn danger',onclick:()=>purgeItem(ti)},'🗑 永久刪除'))),
-  t.tag?h('div',{class:'badge'},t.tag):'');
- a.dataset.s=(t.name+' '+t.url+' '+(t.desc||'')+' '+(t.tag||'')).toLowerCase();return a}
-function renderTrash(){const n=state.trash.length;$('#trashBtn').textContent='🗑 最近刪除（'+n+'）';
- const grid=h('div',{class:'grid'});state.trash.forEach((t,ti)=>grid.append(trashEl(t,ti)));
- if(!n)grid.append(h('div',{class:'desc'},'「最近刪除」目前是空的。刪掉的網址會先放在這裡，隨時可以復原。'));
- else grid.append(h('div',{class:'restore'},h('button',{class:'btn danger',onclick:emptyTrash},'🗑 永久清空最近刪除')));
- const title=h('div',{class:'sec-title',onclick:()=>{trashOpen=!trashOpen;sec.classList.toggle('collapsed',!trashOpen)}},
-  h('span',{class:'arrow'},'▼'),'🗑 最近刪除',h('span',{class:'count'},n+'項'));
- const sec=h('section',{class:'sec'+(trashOpen?'':' collapsed'),id:'trashSec'},title,grid);
- const box=$('#trash');box.textContent='';box.append(sec)}
-function render(){
- $('#sub').textContent='共 '+countAll()+' 個網址，分 '+state.sections.length+' 類。點名稱開新分頁；點分類標題可收合；上方可搜尋。';
- document.body.classList.toggle('editing',edit);document.body.classList.toggle('bulking',bulk);$('#bulkBtn').textContent=bulk?'✅ 結束批量搬移':'☑️ 批量搬移模式';$('#bulkBtn').classList.toggle('on',bulk);fillBulk();$('#editBtn').textContent=edit?'✅ 完成編輯':'✏️ 編輯排版';$('#editBtn').classList.toggle('on',edit);$('#addSec').classList.toggle('hide',!edit);
- const wrap=$('#wrap');wrap.textContent='';
- state.sections.forEach((s,si)=>{
-  const grid=h('div',{class:'grid'});grid.dataset.si=si;
-  s.items.forEach((it,ii)=>grid.append(itemEl(it,si,ii)));
-  const tools=h('div',{class:'sec-tools'},
-   h('button',{class:'btn',onclick:e=>{e.stopPropagation();moveSec(si,-1)}},'▲ 上移'),
-   h('button',{class:'btn',onclick:e=>{e.stopPropagation();moveSec(si,1)}},'▼ 下移'),
-   h('button',{class:'btn',onclick:e=>{e.stopPropagation();secForm(si)}},'✎ 改名稱'),
-   h('button',{class:'btn danger',onclick:e=>{e.stopPropagation();delSec(si)}},'🗑 刪除分類'));
-  const title=h('div',{class:'sec-title',onclick:()=>{s.collapsed=!s.collapsed;sec.classList.toggle('collapsed',s.collapsed);persist()}},
-   h('span',{class:'arrow'},'▼'),(s.icon?s.icon+' ':'')+s.title,h('span',{class:'count'},s.items.length+'項'),h('button',{class:'btn sec-sel',onclick:e=>{e.stopPropagation();selSec(si)}},'全選這一類'),tools);
-  const sec=h('section',{class:'sec'+(s.collapsed?' collapsed':'')},title,grid,
-   h('div',{class:'addrow'},h('button',{class:'btn',onclick:()=>itemForm(si,-1)},'＋新增網址到這一類')));
-  wrap.append(sec)});
- renderTrash();applySearch()}
-function itemEl(it,si,ii){
- const box=h('span',{class:'bulk-checkbox'},sel.has(it)?'☑':'☐');
- const inner=[h('div',{class:'handle',title:'拖曳搬動'},'⠿'),box,h('div',{class:'num'},String(ii+1)),
-  h('div',{class:'mid'},h('div',{class:'name'},it.name),h('div',{class:'url'},host(it.url)),it.desc?h('div',{class:'desc'},it.desc):''),
-  it.tag?h('div',{class:'badge'},it.tag):'',h('button',{class:'btn more',onclick:e=>{e.preventDefault();e.stopPropagation();itemForm(si,ii)}},'⋯')];
- const a=h('a',{class:'item',href:it.url,target:'_blank',rel:'noopener'},inner);
- a.dataset.s=(it.name+' '+it.url+' '+it.desc+' '+it.tag).toLowerCase();a.dataset.si=si;a.dataset.ii=ii;
- if(sel.has(it))a.classList.add('selected');
- a.addEventListener('click',e=>{if(edit||bulk)e.preventDefault();if(bulk&&!e.target.closest('.handle,.more')){sel.has(it)?sel.delete(it):sel.add(it);a.classList.toggle('selected',sel.has(it));box.textContent=sel.has(it)?'☑':'☐';$('#bulkCnt').textContent=sel.size}});
- const hd=a.querySelector('.handle');hd.addEventListener('pointerdown',e=>dragStart(e,a,si,ii));
- return a}
-function applySearch(){const k=$('#q').value.trim().toLowerCase();
- document.querySelectorAll('.item').forEach(i=>i.classList.toggle('hide',!!k&&!i.dataset.s.includes(k)));
- document.querySelectorAll('.sec').forEach(s=>{const v=s.querySelectorAll('.item:not(.hide)').length;s.classList.toggle('hide',!!k&&!v&&!edit);if(k&&v)s.classList.remove('collapsed')})}
-// ---- 拖曳（電腦滑鼠、手機手指都用抓把手）----
-let drag=null;
-function dragStart(e,el,si,ii){e.preventDefault();e.stopPropagation();try{el.setPointerCapture(e.pointerId)}catch(_){}drag={el,si,ii};el.classList.add('dragging');
- const mv=ev=>{clearMarks();const t=document.elementFromPoint(ev.clientX,ev.clientY);if(!t)return;const it=t.closest('.item'),gr=t.closest('.grid');
-  if(it&&it!==el)it.classList.add('drop-before');else if(gr&&!it)gr.classList.add('drop-end')};
- const up=ev=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);el.removeEventListener('pointercancel',up);
-  el.classList.remove('dragging');const t=document.elementFromPoint(ev.clientX,ev.clientY);clearMarks();
-  if(t){const it=t.closest('.item'),gr=t.closest('.grid');let ts=null,ti=null;
-   if(it&&it!==el){ts=+it.dataset.si;ti=+it.dataset.ii}else if(gr&&!it){ts=+gr.dataset.si;ti=state.sections[ts].items.length}
-   if(ts!==null)moveItem(drag.si,drag.ii,ts,ti)}drag=null};
- el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up);el.addEventListener('pointercancel',up)}
-function clearMarks(){document.querySelectorAll('.drop-before,.drop-end').forEach(x=>x.classList.remove('drop-before','drop-end'))}
-function moveItem(fs,fi,ts,ti){const it=state.sections[fs].items.splice(fi,1)[0];if(fs===ts&&ti>fi)ti--;state.sections[ts].items.splice(ti,0,it);render();persist()}
-function moveSec(si,d){const j=si+d;if(j<0||j>=state.sections.length)return;const a=state.sections;[a[si],a[j]]=[a[j],a[si]];render();persist()}
-function delSec(si){const s=state.sections[si];if(state.sections.length<=1){alert('至少要留一個分類。');return}
- if(!confirm('確定要刪除整個「'+s.title+'」分類嗎？裡面的項目會先移到「最近刪除」，分類本身會消失。'))return;
- const n=s.items.length;s.items.forEach(i=>toTrash(i,null));state.sections.splice(si,1);render();
- persist(n?'已刪除「'+s.title+'」分類，'+n+' 個項目已移到「最近刪除」':'已刪除「'+s.title+'」分類')}
-// ---- 批量搬移（跟「大樹作品一覽」同一套操作：勾選 → 選分類 → 搬移）----
-function fillBulk(){const o=$('#bulkTo'),v=o.value;o.textContent='';state.sections.forEach((s,i)=>o.append(h('option',{value:String(i)},(s.icon?s.icon+' ':'')+s.title)));if(v&&+v<state.sections.length)o.value=v;$('#bulkCnt').textContent=sel.size}
-function selSec(si){const its=state.sections[si].items,all=its.length&&its.every(i=>sel.has(i));its.forEach(i=>all?sel.delete(i):sel.add(i));render()}
-function bulkMove(){if(!sel.size){setStatus('請先勾選要搬移的項目',true);return}
- const ti=+$('#bulkTo').value,t=state.sections[ti],moved=[];
- state.sections.forEach((s,si)=>{if(si!==ti)s.items=s.items.filter(i=>{if(sel.has(i)){moved.push(i);return false}return true})});
- t.items.push(...moved);sel.clear();render();
- if(!moved.length){setStatus('勾選的網址本來就在「'+t.title+'」');return}persist()}
-function bulkDel(){if(!sel.size){setStatus('請先勾選要刪除的項目',true);return}
- const n=sel.size;
- state.sections.forEach(s=>{s.items=s.items.filter(i=>{if(sel.has(i)){toTrash(i,s.id);return false}return true})});sel.clear();render();persist('已把 '+n+' 個網址移到「最近刪除」，可以復原')}
-// ---- 表單 ----
-function modal(title,fields,buttons){const mask=h('div',{class:'mask'});const box=h('div',{class:'modal'},h('h3',{},title));const inputs={};
- fields.forEach(f=>{box.append(h('label',{},f.label));let el;if(f.options){el=h('select',{},f.options.map(o=>{const op=h('option',{value:o.v},o.t);if(o.v===f.value)op.selected=true;return op}))}else{el=h('input',{value:f.value||'',placeholder:f.ph||''})}inputs[f.key]=el;box.append(el)});
- const close=()=>mask.remove();const acts=h('div',{class:'acts'});
- buttons.forEach(b=>acts.append(h('button',{class:'btn '+(b.cls||''),onclick:()=>{const v={};for(const k in inputs)v[k]=inputs[k].value.trim();if(b.fn(v)!==false)close()}},b.t)));
- acts.append(h('button',{class:'btn',onclick:close},'取消'));box.append(acts);mask.append(box);mask.addEventListener('pointerdown',e=>{if(e.target===mask)close()});document.body.append(mask);
- const first=box.querySelector('input');if(first)first.focus()}
-function itemForm(si,ii){const adding=ii<0;const it=adding?{name:'',url:'',desc:'',tag:''}:state.sections[si].items[ii];
- modal(adding?'新增網址':'編輯網址',[
-  {key:'name',label:'名稱',value:it.name},{key:'url',label:'網址（https://開頭）',value:it.url,ph:'https://'},{key:'desc',label:'說明（選填）',value:it.desc},{key:'tag',label:'標籤（選填，例如 查詢）',value:it.tag},
-  {key:'sec',label:'放在哪一類',value:String(si),options:state.sections.map((s,i)=>({v:String(i),t:(s.icon?s.icon+' ':'')+s.title}))}],
-  [{t:'💾 儲存',fn:v=>{if(!/^https?:\/\//.test(v.url)){alert('網址要用 https:// 開頭');return false}
-    const n={name:v.name||v.url,url:v.url,desc:v.desc,tag:v.tag};const ts=+v.sec;
-    if(adding){state.sections[ts].items.push(n)}else{const old=state.sections[si].items;if(ts===si)old[ii]=n;else{old.splice(ii,1);state.sections[ts].items.push(n)}}
-    state.removed=(state.removed||[]).filter(u=>u!==n.url);state.trash=(state.trash||[]).filter(t=>t.url!==n.url);render();persist()}},
-   ...(adding?[]:[{t:'▲ 上移',fn:()=>{if(ii>0){moveItem(si,ii,si,ii-1)}}},{t:'▼ 下移',fn:()=>{if(ii<state.sections[si].items.length-1){moveItem(si,ii,si,ii+2)}}},
-    {t:'🗑 刪除',cls:'danger',fn:()=>{toTrash(it,state.sections[si].id);state.sections[si].items.splice(ii,1);render();persist('已把「'+it.name+'」移到「最近刪除」，可以復原')}}])])}
-function secForm(si){const adding=si<0;const s=adding?{icon:'📁',title:''}:state.sections[si];
- modal(adding?'新增分類':'改分類名稱',[{key:'icon',label:'符號（一個表情符號，選填）',value:s.icon},{key:'title',label:'分類名稱',value:s.title}],
-  [{t:'💾 儲存',fn:v=>{if(!v.title){alert('請輸入分類名稱');return false}
-    if(adding)state.sections.push({id:'s'+Date.now().toString(36),icon:v.icon,title:v.title,collapsed:false,items:[]});else{s.icon=v.icon;s.title=v.title}render();persist()}}])}
-// ---- 儲存與載入 ----
-function setStatus(t,err){const s=$('#status');s.textContent=t;s.classList.toggle('err',!!err)}
-function persist(msg){try{localStorage.setItem(CACHE,JSON.stringify(state));localStorage.setItem(DIRTY,'1')}catch(e){}
- pendingMsg=msg||'';setStatus((pendingMsg?pendingMsg+'｜':'')+'儲存中…');clearTimeout(saveTimer);saveTimer=setTimeout(push,500)}
-function push(){fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:state}),keepalive:true})
- .then(r=>r.ok?(setStatus((pendingMsg?pendingMsg+'｜':'')+'✓ 已儲存，所有裝置都會看到'),localStorage.removeItem(DIRTY)):Promise.reject(r.status)).catch(()=>setStatus('⚠ 儲存失敗，稍後再試（已先存在這台裝置）',true))}
-$('#editBtn').onclick=()=>{edit=!edit;render()};$('#bulkBtn').onclick=()=>{bulk=!bulk;if(!bulk)sel.clear();render()};$('#bulkMove').onclick=bulkMove;$('#bulkDel').onclick=bulkDel;$('#trashBtn').onclick=()=>{trashOpen=true;renderTrash();applySearch();$('#trashSec').scrollIntoView({behavior:'smooth',block:'start'})};$('#addSec').onclick=()=>secForm(-1);$('#q').addEventListener('input',applySearch);
-addEventListener('pagehide',()=>{if(saveTimer){clearTimeout(saveTimer);push()}});
-let cached=null;try{cached=JSON.parse(localStorage.getItem(CACHE)||'null')}catch(e){}
-state=merge(cached&&cached.sections?cached:defaults());render();
-fetch(API).then(r=>r.json()).then(j=>{if(localStorage.getItem(DIRTY)){push();return} // 這台有還沒送出去的修改，先送出，不被伺服器舊版蓋掉
- if(j&&j.data&&j.data.sections){sel.clear();state=merge(j.data);try{localStorage.setItem(CACHE,JSON.stringify(state))}catch(e){}render()}}).catch(()=>{});
-</script></body></html>
+(function(){
+  var DEFAULTS = __DEFAULTS__;
+  var CACHE_KEY = 'mytools_state_v1';
+  var DIRTY_KEY = 'mytools_dirty_v1'; // 這台裝置有還沒送到伺服器的修改，載入時先送出，不被伺服器舊版蓋掉
+
+  // ── 跨裝置同步：作品一覽是把好幾個 localStorage 欄位推到 /api/coach888/state；
+  // 這裡整頁存成一份 {sections, removed, trash, trashCollapsed}，格式由伺服器 _mytools_clean 檢查。
+  var SYNC_ENDPOINT = 'https://event.bymyway.com/api/mytools/state';
+  var _syncTimer = null;
+  var _syncDirty = false;
+  var removedUrls = []; // 刪過的網址（含永久刪除）：原始清單 DEFAULTS 不會再把它們補回來
+
+  // 畫面就是資料：從目前畫面上的分類、項目、最近刪除讀出要存的內容
+  function buildState(){
+    var sections = [], trash = [], live = {};
+    document.querySelectorAll('.section-block').forEach(function(block){
+      var title = block.querySelector('.section-title');
+      var grid = block.querySelector('.grid');
+      if (!title || !grid) return;
+      var items = Array.prototype.map.call(grid.querySelectorAll('.item'), function(it){
+        return { name: it.querySelector('.name').textContent.trim(), url: it.dataset.url, desc: it.dataset.desc || '',
+                 tag: it.querySelector('.badge').textContent.trim(), from: it.dataset.from || null };
+      });
+      if (block.id === 'recycleBinBlock') { trash = items; return; }
+      items.forEach(function(i){ live[i.url] = true; delete i.from; });
+      sections.push({ id: title.dataset.section, icon: block.dataset.icon || '',
+                      title: title.querySelector('.title-text').textContent.trim(),
+                      collapsed: block.classList.contains('collapsed'), items: items });
+    });
+    trash.forEach(function(t){ if (removedUrls.indexOf(t.url) < 0) removedUrls.push(t.url); });
+    removedUrls = removedUrls.filter(function(u){ return !live[u]; });
+    return { sections: sections, removed: removedUrls.slice(), trash: trash,
+             trashCollapsed: document.getElementById('recycleBinBlock').classList.contains('collapsed') };
+  }
+  function syncStateToServer(){
+    _syncDirty = true;
+    clearTimeout(_syncTimer);
+    _syncTimer = setTimeout(function(){
+      fetch(SYNC_ENDPOINT, {
+        method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({data: buildState()})
+      }).then(function(r){
+        _syncDirty = false;
+        if (r.ok) { try { localStorage.removeItem(DIRTY_KEY); } catch(e){} toast('✅ 已同步（剛剛）'); }
+        else toast('⚠️ 同步失敗，稍後會自動重試');
+      }).catch(function(){ toast('⚠️ 同步失敗，稍後會自動重試'); });
+    }, 400);
+  }
+  function saveState(){
+    try {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(buildState()));
+      localStorage.setItem(DIRTY_KEY, '1');
+    } catch(e){}
+    syncStateToServer();
+  }
+  // 作品一覽每種修改各存一個欄位；這裡整份一起存，名字留著方便跟作品一覽逐行對照
+  var saveLayout = saveState, saveTitles = saveState, saveBadges = saveState, saveNames = saveState,
+      saveCollapse = saveState, saveSections = saveState, saveSectionOrder = saveState;
+  // 離頁前 400ms 還沒送出的最後一個動作補送（作品一覽用 sendBeacon；這個端點要檢查來源網站，改用 keepalive）
+  function flushSyncOnLeave(){
+    if (!_syncDirty) return;
+    clearTimeout(_syncTimer);
+    try {
+      fetch(SYNC_ENDPOINT, { method: 'POST', headers: {'Content-Type': 'application/json'},
+                             body: JSON.stringify({data: buildState()}), keepalive: true });
+      _syncDirty = false;
+    } catch(e){}
+  }
+  window.addEventListener('pagehide', flushSyncOnLeave);
+  window.addEventListener('beforeunload', flushSyncOnLeave);
+
+  // ── 原始清單：tools.json 之後新增的網址，伺服器版沒有、也沒被刪過 → 自動補進對應分類
+  function host(u){ try { var p = new URL(u); return p.host + (p.pathname === '/' ? '' : p.pathname.replace(/\/$/, '')); } catch(e){ return u; } }
+  function clone(o){ return JSON.parse(JSON.stringify(o)); }
+  function defaults(){
+    return { sections: DEFAULTS.map(function(s){ return { id: s.id, icon: s.icon, title: s.title, collapsed: false, items: clone(s.items) }; }),
+             removed: [], trash: [] };
+  }
+  function merge(st){
+    st.trash = Array.isArray(st.trash) ? st.trash.filter(function(t){ return t && t.url; }) : [];
+    var known = {};
+    (st.removed || []).forEach(function(u){ known[u] = true; });
+    st.sections.forEach(function(s){ s.items.forEach(function(i){ known[i.url] = true; }); });
+    st.trash.forEach(function(t){ known[t.url] = true; });
+    DEFAULTS.forEach(function(d){ d.items.forEach(function(i){
+      if (known[i.url]) return;
+      var t = st.sections.filter(function(s){ return s.id === d.id; })[0] || st.sections[0];
+      t.items.push(clone(i));
+    }); });
+    // 舊版刪除只記了網址，這裡補成最近刪除裡的項目（名稱取原始清單，原始清單沒有就顯示網址）
+    var live = {}, seen = {}, dead = [];
+    st.sections.forEach(function(s){ s.items.forEach(function(i){ live[i.url] = true; }); });
+    st.trash.forEach(function(t){ if (!live[t.url] && !seen[t.url]) { seen[t.url] = true; dead.push(t); } });
+    (st.removed || []).forEach(function(u){
+      if (live[u] || seen[u]) return;
+      seen[u] = true;
+      var hit = null;
+      DEFAULTS.forEach(function(d){ d.items.forEach(function(i){ if (i.url === u) { hit = clone(i); hit.from = d.id; } }); });
+      dead.push(hit || { name: host(u), url: u, desc: '', tag: '', from: null });
+    });
+    st.trash = dead;
+    return st;
+  }
+
+  // ── 熱門排行：沿用作品一覽的點擊計次，網址前加「mytools::」，次數不跟作品一覽混在一起
+  var CLICK_ENDPOINT = 'https://event.bymyway.com/api/coach888/click';
+  var CLICK_COUNTS_ENDPOINT = 'https://event.bymyway.com/api/coach888/click-counts';
+  var CLICK_PREFIX = 'mytools::';
+  var HOT_RANKING_TOP_N = 10;
+
+  function removeFromHotRanking(url){
+    return fetch(CLICK_COUNTS_ENDPOINT, {
+      method: 'DELETE', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({url: CLICK_PREFIX + url})
+    });
+  }
+
+  function trackClick(url){
+    if (!url) return;
+    try {
+      var blob = new Blob([JSON.stringify({url: CLICK_PREFIX + url})], {type: 'application/json'});
+      if (navigator.sendBeacon) navigator.sendBeacon(CLICK_ENDPOINT, blob);
+      else fetch(CLICK_ENDPOINT, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({url: CLICK_PREFIX + url}), keepalive:true});
+    } catch(e){}
+  }
+
+  // 用capture監聽、不call preventDefault/stopPropagation，完全不干擾原本的連結開啟行為
+  document.addEventListener('click', function(e){
+    var link = e.target.closest('a.name');
+    if (!link) return;
+    var container = link.closest('[data-url]');
+    trackClick(container ? container.dataset.url : link.getAttribute('href'));
+  }, true);
+
+  function loadHotRanking(){
+    var grid = document.getElementById('hotRankingGrid');
+    if (!grid) return;
+    fetch(CLICK_COUNTS_ENDPOINT + '?prefix=' + encodeURIComponent(CLICK_PREFIX)).then(function(r){ return r.json(); }).then(function(counts){
+      var urlToItem = {};
+      document.querySelectorAll('.item[data-url]').forEach(function(it){ urlToItem[it.dataset.url] = it; });
+      var entries = Object.keys(counts).map(function(u){ return {url: u.slice(CLICK_PREFIX.length), count: counts[u]}; })
+        .filter(function(e){ return e.count > 0 && urlToItem[e.url]; }) // 對應項目已被刪除，不顯示殘影
+        .sort(function(a,b){ return b.count - a.count; })
+        .slice(0, HOT_RANKING_TOP_N);
+      if (!entries.length) return; // 保留HTML原本「還沒有點擊紀錄」的提示文字
+      grid.innerHTML = '';
+      entries.forEach(function(entry, i){
+        var src = urlToItem[entry.url];
+        var nameEl = src.querySelector('.name');
+        var urlEl = src.querySelector('.url');
+        var badgeEl = src.querySelector('.badge');
+        var item = document.createElement('div');
+        item.className = 'hot-item';
+        item.dataset.url = entry.url;
+        var rank = document.createElement('div');
+        rank.className = 'hot-rank'; rank.textContent = i + 1;
+        var a = document.createElement('a');
+        a.className = 'name'; a.href = entry.url; a.target = '_blank';
+        a.textContent = nameEl ? nameEl.textContent : entry.url;
+        var urlDiv = document.createElement('div');
+        urlDiv.className = 'url'; urlDiv.textContent = urlEl ? urlEl.textContent : '';
+        item.appendChild(rank); item.appendChild(a); item.appendChild(urlDiv);
+        if (badgeEl) {
+          var badge = document.createElement('div');
+          badge.className = badgeEl.className; badge.textContent = badgeEl.textContent;
+          item.appendChild(badge);
+        }
+        var clicks = document.createElement('div');
+        clicks.className = 'hot-clicks'; clicks.textContent = '點擊 ' + entry.count + ' 次';
+        item.appendChild(clicks);
+        var del = document.createElement('span');
+        del.className = 'hot-item-del'; del.title = '從熱門排行移除（不影響原分類項目本身）'; del.textContent = '✕';
+        del.addEventListener('click', function(ev){
+          ev.preventDefault(); ev.stopPropagation();
+          removeFromHotRanking(entry.url).then(function(){
+            item.remove();
+            toast('已從熱門排行移除「' + a.textContent + '」');
+          }).catch(function(){ toast('⚠️ 移除失敗，稍後再試'); });
+        });
+        item.appendChild(del);
+        grid.appendChild(item);
+      });
+    }).catch(function(){});
+  }
+
+  function renumber(grid){
+    grid.querySelectorAll('.item .num').forEach(function(el, i){ el.textContent = i + 1; });
+    var title = grid.previousElementSibling;
+    if (title && title.classList.contains('section-title')) {
+      var countEl = title.querySelector('.count');
+      if (countEl) countEl.textContent = grid.querySelectorAll('.item').length + '項';
+    }
+  }
+
+  function esc(s){ return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+
+  function createSectionBlock(key, name, icon){
+    var block = document.createElement('div');
+    block.className = 'section-block';
+    if (icon) block.dataset.icon = icon;
+    block.innerHTML =
+      '<div class="section-title" data-section="' + esc(key) + '">' +
+        '<span class="toggle-arrow" title="收合/展開">▼</span>' +
+        '<span class="section-drag-handle" title="拖曳調整分類順序">⠿</span>' +
+        (icon ? '<span class="idx">' + esc(icon) + '</span>' : '') +
+        '<span class="title-text" contenteditable="true" spellcheck="false">' + esc(name) + '</span> ' +
+        '<span class="count">0項</span>' +
+        '<span class="section-del" title="刪除整個分類">🗑</span>' +
+      '</div>' +
+      '<div class="grid" data-section="' + esc(key) + '"></div>' +
+      '<button class="btn-add-item" data-section="' + esc(key) + '">+ 新增項目</button>';
+    return block;
+  }
+
+  function bindEditable(el, onSave){
+    el.addEventListener('keydown', function(e){
+      if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
+    });
+    el.addEventListener('blur', onSave);
+  }
+
+  function wireItem(item){
+    var handle = item.querySelector('.drag-handle');
+    handle.addEventListener('pointerdown', function(e){
+      e.preventDefault();
+      dragEl = item;
+      sourceGrid = item.closest('.grid');
+      item.classList.add('dragging');
+      document.addEventListener('pointermove', onMouseMove);
+      document.addEventListener('pointerup', onMouseUp);
+      document.addEventListener('pointercancel', onMouseUp);
+    });
+    var del = item.querySelector('.item-del');
+    del.addEventListener('click', function(){
+      var name = item.querySelector('.name').textContent.trim();
+      var grid = item.closest('.grid');
+      if (grid.dataset.section === 'recentlydeleted') {
+        // 在「最近刪除」裡按刪除＝真的永久刪除，才需要確認
+        if (!confirm('確定要永久刪除「' + name + '」嗎？這個動作無法復原。')) return;
+        if (removedUrls.indexOf(item.dataset.url) < 0) removedUrls.push(item.dataset.url);
+        item.remove();
+        renumber(grid);
+        saveLayout();
+        toast('已永久刪除「' + name + '」');
+        return;
+      }
+      // 一般分類刪除＝移進「最近刪除」，可復原，不用再跳確認視窗
+      var recycleGrid = document.querySelector('.grid[data-section="recentlydeleted"]');
+      item.dataset.from = grid.dataset.section;
+      recycleGrid.appendChild(item);
+      renumber(grid);
+      renumber(recycleGrid);
+      saveLayout();
+      toast('已移到「最近刪除」，用☑️批量搬移模式可以勾選移回原分類');
+    });
+    var badgeEl = item.querySelector('.badge');
+    bindEditable(badgeEl, saveBadges);
+    ensureBulkCheckbox(item);
+    ensureEditIcon(item);
+  }
+
+  function ensureBulkCheckbox(item){
+    if (item.querySelector('.bulk-checkbox')) return;
+    var cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'bulk-checkbox';
+    item.querySelector('.drag-handle').insertAdjacentElement('afterend', cb);
+    cb.addEventListener('change', function(){
+      item.classList.toggle('selected', cb.checked);
+      updateBulkBar();
+    });
+  }
+
+  function ensureEditIcon(item){
+    if (item.querySelector('.edit-name')) return;
+    var nameEl = item.querySelector('.name');
+    var icon = document.createElement('span');
+    icon.className = 'edit-name';
+    icon.title = '修改顯示名稱';
+    icon.textContent = '✏️';
+    icon.addEventListener('click', function(e){
+      e.preventDefault();
+      var current = nameEl.textContent.trim();
+      var next = prompt('新的顯示名稱？', current);
+      if (next === null || next.trim() === '') return;
+      nameEl.textContent = next.trim();
+      saveNames();
+      toast('已改名為「' + next.trim() + '」，記得按上方複製排序貼給AI固化');
+    });
+    nameEl.insertAdjacentElement('afterend', icon);
+  }
+
+  function createItemElement(url, name, badge, desc){
+    var item = document.createElement('div');
+    item.className = 'item';
+    item.dataset.url = url;
+    item.innerHTML = '<span class="drag-handle">⠿</span>' +
+      '<div class="num">0</div>' +
+      '<a class="name" href="' + esc(url) + '" target="_blank">' + esc(name || url) + '</a>' +
+      '<div class="url">' + esc(host(url)) + '</div>' +
+      '<div class="badge star" contenteditable="true" spellcheck="false">' + esc(badge || '') + '</div>' +
+      '<span class="item-del" title="刪除這個項目">✕</span>';
+    if (desc) { item.dataset.desc = desc; item.querySelector('.name').title = desc; }
+    return item;
+  }
+
+  function addItem(grid){
+    var name = prompt('項目名稱？');
+    if (name === null || name.trim() === '') return;
+    var url = prompt('網址？（例如 https://xxx.bymyway.com/）');
+    if (url === null || url.trim() === '') return;
+    var badge = prompt('標籤文字？（例如：常用／查詢／工具／策展）', '常用');
+    if (badge === null) badge = '';
+    name = name.trim(); url = url.trim(); badge = badge.trim();
+    if (!/^https?:\/\//i.test(url)) url = 'https://' + url; // 伺服器只收 http(s) 網址，少打了就補上
+
+    var item = createItemElement(url, name, badge);
+    grid.appendChild(item);
+    wireItem(item);
+    renumber(grid);
+    saveLayout();
+    toast('已新增「' + name + '」，其他裝置重新整理就會同步看到');
+  }
+
+  function wireSectionBlock(block){
+    var title = block.querySelector('.section-title');
+    var grid = block.querySelector('.grid');
+    var arrow = title.querySelector('.toggle-arrow');
+    arrow.addEventListener('click', function(){
+      block.classList.toggle('collapsed');
+      saveCollapse();
+    });
+    var sectionHandle = title.querySelector('.section-drag-handle');
+    if (sectionHandle) {
+      sectionHandle.addEventListener('pointerdown', function(e){
+        e.preventDefault();
+        sectionDragEl = block;
+        block.classList.add('section-dragging');
+        document.addEventListener('pointermove', onSectionMouseMove);
+        document.addEventListener('pointerup', onSectionMouseUp);
+        document.addEventListener('pointercancel', onSectionMouseUp);
+      });
+    }
+    var delBtn = title.querySelector('.section-del');
+    delBtn.addEventListener('click', function(){
+      var name = title.querySelector('.title-text').textContent.trim();
+      if (!confirm('確定要刪除整個「' + name + '」分類嗎？裡面的項目會先移到「最近刪除」，分類本身會消失。')) return;
+      var recycleGrid = document.querySelector('.grid[data-section="recentlydeleted"]');
+      var items = Array.prototype.slice.call(grid.querySelectorAll('.item'));
+      items.forEach(function(it){ it.dataset.from = grid.dataset.section; recycleGrid.appendChild(it); });
+      renumber(recycleGrid);
+      block.remove();
+      saveLayout();
+      saveTitles();
+      saveSections();
+      if (bulkModeOn) populateBulkSelect();
+      toast('已刪除「' + name + '」分類，' + items.length + ' 個項目已移到「最近刪除」');
+    });
+    var titleText = title.querySelector('.title-text');
+    bindEditable(titleText, saveTitles);
+    var addBtn = block.querySelector('.btn-add-item');
+    addBtn.addEventListener('click', function(){ addItem(grid); });
+  }
+
+  function addSection(){
+    var name = prompt('新分類的標題？');
+    if (name === null || name.trim() === '') return;
+    name = name.trim();
+    var key = 'custom' + Date.now();
+
+    var block = createSectionBlock(key, name);
+    document.querySelector('.wrap').insertBefore(block, document.getElementById('recycleBinBlock'));
+    wireSectionBlock(block);
+    saveTitles();
+    saveSections();
+    if (bulkModeOn) populateBulkSelect(); // 新分類要立刻出現在批量搬移下拉選單，不用等重新切換模式
+    toast('已新增「' + name + '」分類，接著可以按「+ 新增項目」加內容');
+  }
+
+  // 把一份存檔畫成畫面：分類依存檔順序排在「最近刪除」前面
+  function renderState(st){
+    removedUrls = (st.removed || []).slice();
+    var wrap = document.querySelector('.wrap');
+    var recycle = document.getElementById('recycleBinBlock');
+    document.querySelectorAll('.section-block').forEach(function(b){ if (b.id !== 'recycleBinBlock') b.remove(); });
+    st.sections.forEach(function(s){
+      var block = createSectionBlock(s.id, s.title || '未命名分類', s.icon);
+      if (s.collapsed) block.classList.add('collapsed');
+      var grid = block.querySelector('.grid');
+      s.items.forEach(function(i){ grid.appendChild(createItemElement(i.url, i.name, i.tag, i.desc)); });
+      wrap.insertBefore(block, recycle);
+      wireSectionBlock(block);
+    });
+    var recycleGrid = recycle.querySelector('.grid');
+    recycleGrid.innerHTML = '';
+    (st.trash || []).forEach(function(t){
+      var it = createItemElement(t.url, t.name, t.tag, t.desc);
+      if (t.from) it.dataset.from = t.from;
+      recycleGrid.appendChild(it);
+    });
+    recycle.classList.toggle('collapsed', !!st.trashCollapsed);
+    document.querySelectorAll('.item').forEach(wireItem);
+    document.querySelectorAll('.grid').forEach(renumber);
+    if (bulkModeOn) { populateBulkSelect(); updateBulkBar(); }
+  }
+
+  function getDragAfterElement(grid, y){
+    var els = Array.prototype.slice.call(grid.querySelectorAll('.item:not(.dragging)'));
+    return els.reduce(function(closest, child){
+      var box = child.getBoundingClientRect();
+      var offset = y - box.top - box.height / 2;
+      if (offset < 0 && offset > closest.offset) {
+        return { offset: offset, element: child };
+      }
+      return closest;
+    }, { offset: -Infinity, element: null }).element;
+  }
+
+  // 拖曳跟作品一覽一樣手刻（不用原生 draggable，避免跟連結的原生拖曳打架）；
+  // 作品一覽用滑鼠事件，這裡用 pointer 事件，手機手指按住 ⠿ 也能拖
+  var dragEl = null;
+  var sourceGrid = null;
+
+  function onMouseMove(e){
+    if (!dragEl) return;
+    var el = document.elementFromPoint(e.clientX, e.clientY);
+    var targetGrid = el ? el.closest('.grid') : null;
+    if (!targetGrid) return;
+    var afterEl = getDragAfterElement(targetGrid, e.clientY);
+    if (afterEl == null) {
+      targetGrid.appendChild(dragEl);
+    } else if (afterEl !== dragEl) {
+      targetGrid.insertBefore(dragEl, afterEl);
+    }
+  }
+
+  function onMouseUp(){
+    if (!dragEl) return;
+    dragEl.classList.remove('dragging');
+    var targetGrid = dragEl.closest('.grid');
+    if (targetGrid.dataset.section === 'recentlydeleted' && targetGrid !== sourceGrid) dragEl.dataset.from = sourceGrid.dataset.section;
+    renumber(sourceGrid);
+    if (targetGrid !== sourceGrid) renumber(targetGrid);
+    saveLayout();
+    dragEl = null;
+    sourceGrid = null;
+    document.removeEventListener('pointermove', onMouseMove);
+    document.removeEventListener('pointerup', onMouseUp);
+    document.removeEventListener('pointercancel', onMouseUp);
+  }
+
+  // 大分類本身也能拖曳調整順序：.wrap 是雙欄排版，所以用「游標當下壓在哪一塊」判斷插在前面還是後面
+  var sectionDragEl = null;
+
+  function onSectionMouseMove(e){
+    if (!sectionDragEl) return;
+    var el = document.elementFromPoint(e.clientX, e.clientY);
+    var targetBlock = el ? el.closest('.section-block') : null;
+    if (!targetBlock || targetBlock === sectionDragEl || targetBlock.id === 'recycleBinBlock') return;
+    var wrap = document.querySelector('.wrap');
+    var box = targetBlock.getBoundingClientRect();
+    var before = e.clientY < box.top + box.height / 2;
+    if (before) {
+      wrap.insertBefore(sectionDragEl, targetBlock);
+    } else {
+      wrap.insertBefore(sectionDragEl, targetBlock.nextElementSibling);
+    }
+  }
+
+  function onSectionMouseUp(){
+    if (!sectionDragEl) return;
+    sectionDragEl.classList.remove('section-dragging');
+    sectionDragEl = null;
+    saveSectionOrder();
+    document.removeEventListener('pointermove', onSectionMouseMove);
+    document.removeEventListener('pointerup', onSectionMouseUp);
+    document.removeEventListener('pointercancel', onSectionMouseUp);
+  }
+
+  var toastEl = document.getElementById('toast');
+  var toastTimer = null;
+  function toast(msg){
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 2200);
+  }
+
+  (function initRecycleBin(){
+    var block = document.getElementById('recycleBinBlock');
+    var arrow = block.querySelector('.toggle-arrow');
+    arrow.addEventListener('click', function(){
+      block.classList.toggle('collapsed');
+      saveCollapse();
+    });
+    var emptyBtn = document.getElementById('btnEmptyRecycleBin');
+    emptyBtn.addEventListener('click', function(){
+      var grid = block.querySelector('.grid');
+      var n = grid.querySelectorAll('.item').length;
+      if (n === 0) { toast('最近刪除目前是空的'); return; }
+      if (!confirm('確定要永久清空「最近刪除」的 ' + n + ' 個項目嗎？這個動作無法復原。')) return;
+      grid.querySelectorAll('.item').forEach(function(it){ if (removedUrls.indexOf(it.dataset.url) < 0) removedUrls.push(it.dataset.url); });
+      grid.innerHTML = '';
+      renumber(grid);
+      saveLayout();
+      toast('已永久清空最近刪除');
+    });
+  })();
+
+  document.getElementById('btnAddSection').addEventListener('click', addSection);
+
+  var bulkModeOn = false;
+
+  function updateBulkBar(){
+    var checked = document.querySelectorAll('.bulk-checkbox:checked').length;
+    document.getElementById('bulkCount').textContent = checked;
+    document.getElementById('bulkBar').classList.toggle('show', bulkModeOn);
+  }
+
+  function populateBulkSelect(){
+    var sel = document.getElementById('bulkTargetSelect');
+    sel.innerHTML = '';
+    document.querySelectorAll('.section-title').forEach(function(title){
+      var opt = document.createElement('option');
+      opt.value = title.dataset.section;
+      opt.textContent = title.querySelector('.title-text').textContent.trim();
+      sel.appendChild(opt);
+    });
+  }
+
+  document.getElementById('btnBulkMode').addEventListener('click', function(){
+    bulkModeOn = !bulkModeOn;
+    document.querySelector('.wrap').classList.toggle('bulk-mode', bulkModeOn);
+    this.textContent = bulkModeOn ? '✅ 結束批量搬移' : '☑️ 批量搬移模式';
+    if (bulkModeOn) {
+      populateBulkSelect();
+    } else {
+      document.querySelectorAll('.bulk-checkbox:checked').forEach(function(cb){ cb.checked = false; });
+      document.querySelectorAll('.item.selected').forEach(function(it){ it.classList.remove('selected'); });
+    }
+    updateBulkBar();
+  });
+
+  document.getElementById('btnBulkMove').addEventListener('click', function(){
+    var targetSection = document.getElementById('bulkTargetSelect').value;
+    var targetGrid = document.querySelector('.grid[data-section="' + targetSection + '"]');
+    if (!targetGrid) return;
+    var checkedBoxes = Array.prototype.slice.call(document.querySelectorAll('.bulk-checkbox:checked'));
+    if (checkedBoxes.length === 0) { toast('請先勾選要搬移的項目'); return; }
+    var seenSections = {};
+    var sourceGrids = [];
+    checkedBoxes.forEach(function(cb){
+      var item = cb.closest('.item');
+      var srcGrid = item.closest('.grid');
+      if (!seenSections[srcGrid.dataset.section]) {
+        seenSections[srcGrid.dataset.section] = true;
+        sourceGrids.push(srcGrid);
+      }
+      if (targetSection === 'recentlydeleted' && srcGrid !== targetGrid) item.dataset.from = srcGrid.dataset.section;
+      targetGrid.appendChild(item);
+      cb.checked = false;
+      item.classList.remove('selected');
+    });
+    sourceGrids.forEach(renumber);
+    renumber(targetGrid);
+    saveLayout();
+    updateBulkBar();
+    var targetName = targetGrid.previousElementSibling.querySelector('.title-text').textContent.trim();
+    toast('已搬移 ' + checkedBoxes.length + ' 個項目到「' + targetName + '」，記得按上方複製排序貼給AI固化');
+  });
+
+  document.getElementById('btnCopy').addEventListener('click', function(){
+    var lines = [];
+    document.querySelectorAll('.section-title').forEach(function(title, idx){
+      var grid = document.querySelectorAll('.grid')[idx];
+      lines.push(title.textContent.trim());
+      grid.querySelectorAll('.item').forEach(function(item){
+        var num = item.querySelector('.num').textContent;
+        var name = item.querySelector('.name').textContent;
+        var url = item.dataset.url;
+        var badge = item.querySelector('.badge').textContent.trim();
+        lines.push('  ' + num + '. ' + name + '  ' + url + '  [' + badge + ']');
+      });
+      lines.push('');
+    });
+    var text = lines.join('\n');
+    navigator.clipboard.writeText(text).then(function(){
+      toast('已複製目前排序，貼給小龍蝦即可固化進正式檔案');
+    }, function(){
+      toast('複製失敗，請手動選取畫面上的文字');
+    });
+  });
+
+  // 先用這台裝置上次的存檔（沒有就用原始清單）快速畫出畫面，伺服器最新版拉到後再畫一次
+  var cached = null;
+  try { cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null'); } catch(e){}
+  renderState(merge(cached && cached.sections ? cached : defaults()));
+  loadHotRanking();
+  fetch(SYNC_ENDPOINT).then(function(r){ return r.json(); }).then(function(j){
+    var dirty = null;
+    try { dirty = localStorage.getItem(DIRTY_KEY); } catch(e){}
+    if (dirty) { syncStateToServer(); return; }
+    if (j && j.data && j.data.sections) {
+      var st = merge(j.data);
+      renderState(st);
+      try { localStorage.setItem(CACHE_KEY, JSON.stringify(st)); } catch(e){}
+      loadHotRanking(); // 跨裝置排版校正完成、項目都已就位後再抓一次最新點擊排行
+    }
+  }).catch(function(){});
+})();
+</script>
+</body>
+</html>
