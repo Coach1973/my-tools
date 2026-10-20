@@ -64,7 +64,7 @@ a.item:hover{border-color:var(--gold);background:#1a1a1a}
 <div class="bar"><input class="search" id="q" type="search" placeholder="🔍 搜尋：名稱／網址／說明">
 <button class="btn" id="editBtn">✏️ 編輯排版</button>
 <button class="btn" id="bulkBtn">☑️ 批量搬移模式</button>
-<button class="btn" id="trashBtn">🗑 已刪除（0）</button>
+<button class="btn" id="trashBtn">🗑 最近刪除（0）</button>
 <button class="btn hide" id="addSec">＋新增分類</button>
 <span class="status" id="status"></span></div></div>
 <div class="wrap" id="wrap"></div>
@@ -72,7 +72,7 @@ a.item:hover{border-color:var(--gold);background:#1a1a1a}
 <div class="bulk-bar" id="bulkBar"><span>已勾選 <span class="cnt" id="bulkCnt">0</span> 個項目</span>
 <select id="bulkTo"></select><button class="btn" id="bulkMove">搬移到這個分類</button>
 <button class="btn danger" id="bulkDel">🗑 刪除勾選項目</button></div>
-<div class="foot">按「✏️ 編輯排版」可以自己改分類名稱、拖曳或用「⋯」搬項目、新增與刪除網址；按「☑️ 批量搬移模式」可以勾選多個網址，一次搬到指定分類或刪除；刪掉的網址會先放到最下面的「🗑 已刪除」，隨時可以按「↩ 復原」；改完自動儲存，每台裝置看到的都一樣。</div>
+<div class="foot">按「✏️ 編輯排版」可以自己改分類名稱、拖曳或用「⋯」搬項目、新增與刪除網址；按「☑️ 批量搬移模式」可以勾選多個網址，一次搬到指定分類或刪除；刪掉的網址會先放到最下面的「🗑 最近刪除」，隨時可以按「↩ 復原」；改完自動儲存，每台裝置看到的都一樣。</div>
 <script>
 const DEFAULTS=__DEFAULTS__;
 const DIRTY='mytools_dirty_v1';
@@ -89,14 +89,14 @@ function merge(st){ // 之後在原始清單新增的網址，伺服器版沒有
  st.trash=Array.isArray(st.trash)?st.trash.filter(t=>t&&t.url):[];
  const known=new Set(st.removed||[]);st.sections.forEach(s=>s.items.forEach(i=>known.add(i.url)));st.trash.forEach(t=>known.add(t.url));
  DEFAULTS.forEach(d=>d.items.forEach(i=>{if(!known.has(i.url)){const t=st.sections.find(s=>s.id===d.id)||st.sections[0];t.items.push(clone(i))}}));
- // 已刪除：舊版刪除只記了網址，這裡補成可以復原的項目（名稱取原始清單，原始清單沒有就顯示網址）
+ // 最近刪除：舊版刪除只記了網址，這裡補成可以復原的項目（名稱取原始清單，原始清單沒有就顯示網址）
  const live=new Set(),seen=new Set(),dead=[];st.sections.forEach(s=>s.items.forEach(i=>live.add(i.url)));
  st.trash.forEach(t=>{if(!live.has(t.url)&&!seen.has(t.url)){seen.add(t.url);dead.push(t)}});
  (st.removed||[]).forEach(u=>{if(live.has(u)||seen.has(u))return;seen.add(u);let hit=null;
   DEFAULTS.forEach(d=>d.items.forEach(i=>{if(i.url===u)hit=Object.assign(clone(i),{from:d.id})}));dead.push(hit||{name:host(u),url:u,desc:'',tag:'',from:null})});
  st.trash=dead;st.removed=[...new Set([...(st.removed||[]),...dead.map(t=>t.url)])];return st}
 function countAll(){return state.sections.reduce((n,s)=>n+s.items.length,0)}
-// ---- 已刪除：刪掉的網址先放這裡，可以復原（跟「大樹作品一覽」的「最近刪除」同一個精神）----
+// ---- 最近刪除：刪掉的網址先放這裡，可以復原（跟「大樹作品一覽」的「最近刪除」同一個精神）----
 function toTrash(it,sid){state.trash=(state.trash||[]).filter(t=>t.url!==it.url);
  state.trash.unshift({name:it.name,url:it.url,desc:it.desc||'',tag:it.tag||'',from:sid||null});
  state.removed=state.removed||[];if(!state.removed.includes(it.url))state.removed.push(it.url)}
@@ -105,17 +105,24 @@ function restoreItem(ti){const t=state.trash[ti];if(!t)return;
  if(!state.sections.some(s=>s.items.some(i=>i.url===t.url)))sec.items.push({name:t.name,url:t.url,desc:t.desc||'',tag:t.tag||''});
  state.trash.splice(ti,1);state.removed=(state.removed||[]).filter(u=>u!==t.url);
  render();persist('已復原「'+t.name+'」到「'+sec.title+'」')}
+function purgeItem(ti){const t=state.trash[ti];if(!t)return;
+ if(!confirm('確定要永久刪除「'+t.name+'」嗎？這個動作無法復原。'))return;
+ state.trash.splice(ti,1);render();persist('已永久刪除「'+t.name+'」')}
+function emptyTrash(){const n=(state.trash||[]).length;if(!n){setStatus('最近刪除目前是空的');return}
+ if(!confirm('確定要永久清空「最近刪除」的 '+n+' 個項目嗎？這個動作無法復原。'))return;
+ state.trash=[];render();persist('已永久清空最近刪除')}
 function trashEl(t,ti){const from=state.sections.find(s=>s.id===t.from);
  const where=from?'原本在：'+(from.icon?from.icon+' ':'')+from.title:'原本的分類沒有記錄，復原時放回「'+state.sections[0].title+'」';
  const a=h('div',{class:'item'},h('div',{class:'num'},String(ti+1)),
-  h('div',{class:'mid'},h('div',{class:'name'},t.name),h('div',{class:'url'},host(t.url)),t.desc?h('div',{class:'desc'},t.desc):'',h('div',{class:'desc'},where),h('button',{class:'btn restore',onclick:()=>restoreItem(ti)},'↩ 復原')),
+  h('div',{class:'mid'},h('div',{class:'name'},t.name),h('div',{class:'url'},host(t.url)),t.desc?h('div',{class:'desc'},t.desc):'',h('div',{class:'desc'},where),h('div',{class:'restore'},h('button',{class:'btn',onclick:()=>restoreItem(ti)},'↩ 復原'),' ',h('button',{class:'btn danger',onclick:()=>purgeItem(ti)},'🗑 永久刪除'))),
   t.tag?h('div',{class:'badge'},t.tag):'');
  a.dataset.s=(t.name+' '+t.url+' '+(t.desc||'')+' '+(t.tag||'')).toLowerCase();return a}
-function renderTrash(){const n=state.trash.length;$('#trashBtn').textContent='🗑 已刪除（'+n+'）';
+function renderTrash(){const n=state.trash.length;$('#trashBtn').textContent='🗑 最近刪除（'+n+'）';
  const grid=h('div',{class:'grid'});state.trash.forEach((t,ti)=>grid.append(trashEl(t,ti)));
- if(!n)grid.append(h('div',{class:'desc'},'目前沒有已刪除的網址。刪掉的網址會放在這裡，隨時可以復原。'));
+ if(!n)grid.append(h('div',{class:'desc'},'「最近刪除」目前是空的。刪掉的網址會先放在這裡，隨時可以復原。'));
+ else grid.append(h('div',{class:'restore'},h('button',{class:'btn danger',onclick:emptyTrash},'🗑 永久清空最近刪除')));
  const title=h('div',{class:'sec-title',onclick:()=>{trashOpen=!trashOpen;sec.classList.toggle('collapsed',!trashOpen)}},
-  h('span',{class:'arrow'},'▼'),'🗑 已刪除',h('span',{class:'count'},n+'項'));
+  h('span',{class:'arrow'},'▼'),'🗑 最近刪除',h('span',{class:'count'},n+'項'));
  const sec=h('section',{class:'sec'+(trashOpen?'':' collapsed'),id:'trashSec'},title,grid);
  const box=$('#trash');box.textContent='';box.append(sec)}
 function render(){
@@ -164,8 +171,10 @@ function dragStart(e,el,si,ii){e.preventDefault();e.stopPropagation();try{el.set
 function clearMarks(){document.querySelectorAll('.drop-before,.drop-end').forEach(x=>x.classList.remove('drop-before','drop-end'))}
 function moveItem(fs,fi,ts,ti){const it=state.sections[fs].items.splice(fi,1)[0];if(fs===ts&&ti>fi)ti--;state.sections[ts].items.splice(ti,0,it);render();persist()}
 function moveSec(si,d){const j=si+d;if(j<0||j>=state.sections.length)return;const a=state.sections;[a[si],a[j]]=[a[j],a[si]];render();persist()}
-function delSec(si){const s=state.sections[si];if(s.items.length){alert('這一類還有 '+s.items.length+' 個網址，請先把它們搬到別的分類，再刪除分類。');return}
- if(state.sections.length<=1){alert('至少要留一個分類。');return}if(confirm('確定刪除分類「'+s.title+'」？')){state.sections.splice(si,1);render();persist()}}
+function delSec(si){const s=state.sections[si];if(state.sections.length<=1){alert('至少要留一個分類。');return}
+ if(!confirm('確定要刪除整個「'+s.title+'」分類嗎？裡面的項目會先移到「最近刪除」，分類本身會消失。'))return;
+ const n=s.items.length;s.items.forEach(i=>toTrash(i,null));state.sections.splice(si,1);render();
+ persist(n?'已刪除「'+s.title+'」分類，'+n+' 個項目已移到「最近刪除」':'已刪除「'+s.title+'」分類')}
 // ---- 批量搬移（跟「大樹作品一覽」同一套操作：勾選 → 選分類 → 搬移）----
 function fillBulk(){const o=$('#bulkTo'),v=o.value;o.textContent='';state.sections.forEach((s,i)=>o.append(h('option',{value:String(i)},(s.icon?s.icon+' ':'')+s.title)));if(v&&+v<state.sections.length)o.value=v;$('#bulkCnt').textContent=sel.size}
 function selSec(si){const its=state.sections[si].items,all=its.length&&its.every(i=>sel.has(i));its.forEach(i=>all?sel.delete(i):sel.add(i));render()}
@@ -176,7 +185,7 @@ function bulkMove(){if(!sel.size){setStatus('請先勾選要搬移的項目',tru
  if(!moved.length){setStatus('勾選的網址本來就在「'+t.title+'」');return}persist()}
 function bulkDel(){if(!sel.size){setStatus('請先勾選要刪除的項目',true);return}
  const n=sel.size;
- state.sections.forEach(s=>{s.items=s.items.filter(i=>{if(sel.has(i)){toTrash(i,s.id);return false}return true})});sel.clear();render();persist('已把 '+n+' 個網址移到「已刪除」，可以復原')}
+ state.sections.forEach(s=>{s.items=s.items.filter(i=>{if(sel.has(i)){toTrash(i,s.id);return false}return true})});sel.clear();render();persist('已把 '+n+' 個網址移到「最近刪除」，可以復原')}
 // ---- 表單 ----
 function modal(title,fields,buttons){const mask=h('div',{class:'mask'});const box=h('div',{class:'modal'},h('h3',{},title));const inputs={};
  fields.forEach(f=>{box.append(h('label',{},f.label));let el;if(f.options){el=h('select',{},f.options.map(o=>{const op=h('option',{value:o.v},o.t);if(o.v===f.value)op.selected=true;return op}))}else{el=h('input',{value:f.value||'',placeholder:f.ph||''})}inputs[f.key]=el;box.append(el)});
@@ -193,7 +202,7 @@ function itemForm(si,ii){const adding=ii<0;const it=adding?{name:'',url:'',desc:
     if(adding){state.sections[ts].items.push(n)}else{const old=state.sections[si].items;if(ts===si)old[ii]=n;else{old.splice(ii,1);state.sections[ts].items.push(n)}}
     state.removed=(state.removed||[]).filter(u=>u!==n.url);state.trash=(state.trash||[]).filter(t=>t.url!==n.url);render();persist()}},
    ...(adding?[]:[{t:'▲ 上移',fn:()=>{if(ii>0){moveItem(si,ii,si,ii-1)}}},{t:'▼ 下移',fn:()=>{if(ii<state.sections[si].items.length-1){moveItem(si,ii,si,ii+2)}}},
-    {t:'🗑 刪除',cls:'danger',fn:()=>{toTrash(it,state.sections[si].id);state.sections[si].items.splice(ii,1);render();persist('已把「'+it.name+'」移到「已刪除」，可以復原')}}])])}
+    {t:'🗑 刪除',cls:'danger',fn:()=>{toTrash(it,state.sections[si].id);state.sections[si].items.splice(ii,1);render();persist('已把「'+it.name+'」移到「最近刪除」，可以復原')}}])])}
 function secForm(si){const adding=si<0;const s=adding?{icon:'📁',title:''}:state.sections[si];
  modal(adding?'新增分類':'改分類名稱',[{key:'icon',label:'符號（一個表情符號，選填）',value:s.icon},{key:'title',label:'分類名稱',value:s.title}],
   [{t:'💾 儲存',fn:v=>{if(!v.title){alert('請輸入分類名稱');return false}
