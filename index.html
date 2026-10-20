@@ -251,6 +251,7 @@
              removed: [], trash: [] };
   }
   function merge(st){
+    var legacy = !Array.isArray(st.trash); // 沒有 trash 欄位＝舊版存檔，刪除只記了網址
     st.trash = Array.isArray(st.trash) ? st.trash.filter(function(t){ return t && t.url; }) : [];
     var known = {};
     (st.removed || []).forEach(function(u){ known[u] = true; });
@@ -261,11 +262,12 @@
       var t = st.sections.filter(function(s){ return s.id === d.id; })[0] || st.sections[0];
       t.items.push(clone(i));
     }); });
-    // 舊版刪除只記了網址，這裡補成最近刪除裡的項目（名稱取原始清單，原始清單沒有就顯示網址）
+    // 舊版刪除只記了網址，這裡補成最近刪除裡的項目（名稱取原始清單，原始清單沒有就顯示網址）。
+    // 只有舊版存檔才補：新版存檔的 removed 包含永久刪除的網址，補回去會讓永久刪除的項目重新出現
     var live = {}, seen = {}, dead = [];
     st.sections.forEach(function(s){ s.items.forEach(function(i){ live[i.url] = true; }); });
     st.trash.forEach(function(t){ if (!live[t.url] && !seen[t.url]) { seen[t.url] = true; dead.push(t); } });
-    (st.removed || []).forEach(function(u){
+    (legacy ? (st.removed || []) : []).forEach(function(u){
       if (live[u] || seen[u]) return;
       seen[u] = true;
       var hit = null;
