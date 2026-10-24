@@ -33,11 +33,13 @@ S=[
 ("字級大小對照表","https://coach1973.github.io/coach888/font-scale.html","大樹AI工具箱的字級參考","工具"),
 ("大樹策展中心｜上傳網址","https://event.bymyway.com/curation/upload","店家／品牌網站上傳，一條龍上架策展中心","查詢"),
 ("榮樹下｜來賓卡","https://event.bymyway.com/rongtree/a/b99f99e2f2b0","榮樹下來賓資料與 AI 來賓卡（專屬連結）","查詢"),
+("免費線上調音器・節拍器｜家緯家吉他坊","https://pickd.tw/guitar-tuner-metronome/","吉他免安裝校音，手機也能用","工具"),
 ]),
 ("works","🎨","大樹作品・策展頁",[
 ("大臺南商圈整合計劃・大台南策展中心","https://event.bymyway.com/tainan-shangquan/","免費為店家建站、開通頻道","策展"),
 ("全世界最優秀的團隊計畫","https://event.bymyway.com/curated/three-lacks/","客戶、人才、伯樂","策展"),
 ("為你轉身｜真 AI 線上團隊商業導師席","https://event.bymyway.com/curated/turnforyou/","八位商業顧問師","策展"),
+("顧問師天團・人才軍火庫","https://event.bymyway.com/curated/skyteam/","上百位專家人才與頂尖顧問師","策展"),
 ("約瑟布｜生命農業與永續商業計畫","https://event.bymyway.com/curated/joseph-cloth/","榮樹下客戶網站","策展"),
 ("有薇力，新東區｜蔡筱薇競選總部成立大會","https://event.bymyway.com/curated/111-wei/","11/1（日）09:00","策展"),
 ("像瘋子的發明家｜黃國彰","https://event.bymyway.com/curated/inventor/","能源專利發明人","策展"),
