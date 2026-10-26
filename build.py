@@ -50,6 +50,10 @@ S=[
 ("教練與軍師：深夜的 32MB 封包攻防戰 第1話","https://www.tava-ai.com/chat/b72pvmh9x1/index.html","TAVA 做的漫畫","漫畫"),
 ("大樹的答案 ── 漫畫版","https://event.bymyway.com/curated/answer/","日系漫畫版思想漫畫","漫畫"),
 ("大樹教練｜企業成長條漫 EP01–EP05","https://event.bymyway.com/curated/answer2/","全五話條漫","漫畫"),
+("反向操作技能書｜看到喜歡的網頁，拆解後換成你的產品重做","https://event.bymyway.com/curated/reverse-skill/","拆解別人網站的特效看懂，再換成自己的產品與服務重做（附開工指令、技法庫、交付檢查表）","工具"),
+("你的假設對了嗎？｜BNI 來賓接待培訓工作坊","https://event.bymyway.com/curated/bni-gusest/","45 分鐘來賓接待工作坊互動教材：假設前提決定行為，行為決定結果","工具"),
+("時間的秘密｜大樹教練 互動工作坊","https://event.bymyway.com/curated/time-secret/","20 分鐘互動工作坊：時間無法管理只能分配，拆解三大商業時間悖論","工具"),
+("台東16站，一起賺得到錢｜台鐵標案提案研究","https://event.bymyway.com/curated/tra-taitung/","台鐵台東16據點提案研究：錢從哪裡來、BNI夥伴怎麼進駐、吸睛機制、財務試算","策展"),
 ]),
 ]
 n=sum(len(s[3]) for s in S)
