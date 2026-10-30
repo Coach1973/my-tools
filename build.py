@@ -11,6 +11,7 @@ S=[
 ("奎嵐 KueiLan｜AI 教學與社群代操","https://kueilan.com/","用 AI 幫你提早下班","AI老師"),
 ("Freebeat｜AI 音樂影片","https://freebeat.ai/tw","AI 音樂與影片創作（繁中版）","AI老師"),
 ("個人行銷／品牌網頁｜開工指令與製作經驗","https://coach1973.github.io/tava-brand-web-playbook/","TAVA 品牌網頁做法 v2（我的 GitHub 備份，一模一樣；2026-10-15 更新，新增公益足跡）","經驗手冊"),
+("做整個網頁開頭動畫的技能｜一頁式開工指令","https://coach1973.github.io/hero-opening-skill/","首頁影音開場動畫：開工指令、動畫架構、製作經驗與交付前檢查（TAVA 原頁的 GitHub 版）","經驗手冊"),
 ("JFETEK｜聯絡洽詢","https://www.jfetek.com/contact","1–2 工作天回覆方案與時程，預設保密","AI老師"),
 ("Tesla Roadster｜最後一台駕駛者之車","https://etimmyqq-lab.github.io/roadster/","個人作品：AI 生成影片搭配官方照片，Tesla 最後一台駕駛者之車","AI老師"),
 ("把 AI 帶回辦公室｜昆廷老師 ChatGPT × Claude 一日實戰","https://etimmyqq-lab.github.io/ai-course/b.html#top","線下實體課 1 天 5 小時，帶自己的真實工作來現場做一遍","AI老師"),
